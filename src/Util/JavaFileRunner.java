@@ -10,8 +10,11 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
@@ -35,12 +38,41 @@ public class JavaFileRunner {
         System.out.println(command + " exitValue() " + process.exitValue());
     }
     
-    private static void viewSourceCode(File file) throws IOException {
-        List<String> lines = Files.readAllLines(file.toPath(), Charset.forName("UTF-8"));
-        for (String line : lines) {
+    @SuppressWarnings("ConvertToTryWithResources")
+    private static void viewSourceCode(File file) {
+        if (file == null) {
+            throw new NullPointerException();
+        }
+        BufferedReader reader;
+        try {
+            reader = Files.newBufferedReader(file.toPath(), Charset.forName("UTF-8"));
+        }
+        catch (IOException ex) {
+            ex.printStackTrace();
+            return;
+        }
+        while (true) {
+            String line;
+            try {
+                line = reader.readLine();
+            }
+            catch (IOException ex) {
+                ex.printStackTrace();
+                break;
+            }
+            if (line == null) {
+                break;
+            }
             System.out.println(line);
         }
-        
+        if (reader != null) {
+            try {
+                reader.close();
+            }
+            catch (IOException ex) {
+               
+            }
+        }
     }
 
     public static void main(String args[]) throws Exception {

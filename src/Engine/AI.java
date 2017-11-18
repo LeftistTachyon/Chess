@@ -71,7 +71,7 @@ public final class AI {
     private static final Database STORE = new Database();
 
     //test mode flag
-    private static final boolean CHECK_MODE = !true;
+    private static final boolean CHECK_MODE = true;
 
     //non-private for Pieces and Grid to allocate ArrayList memory
     static int NUMBER_OF_WHITE_PIECES;
@@ -90,7 +90,7 @@ public final class AI {
     private static final int[] SEARCH_DEPTHS = {1, 2, 3, 4, POSITIVE_INFINITY, POSITIVE_INFINITY};
 
     //test depth used for check mode
-    private static final int TEST_DEPTH = 3;
+    private static final int TEST_DEPTH = 1;
 
     //images corresponding to the AI difficulty
     private static final BufferedImage[] AI_IMAGES = new BufferedImage[DIFFICULTY.length];
@@ -743,6 +743,7 @@ public final class AI {
 
             if (CHECK_MODE) {
                 (TIMER = TEST_TIMER).startTiming();
+                Tester.checkProtections(pieces, side);
                 for (int index = 0; index != numberOfPositions; ++index) {
                     PositionHolder current = possiblePositions.get(index);
                     int alphaBeta = AlphaBetaWhite.min(current.grid, current.whites, current.blacks, TEST_DEPTH, NEGATIVE_INFINITY, POSITIVE_INFINITY);
@@ -1153,6 +1154,7 @@ public final class AI {
 
             if (CHECK_MODE) {
                 (TIMER = TEST_TIMER).startTiming();
+                Tester.checkProtections(pieces, side);
                 for (int index = 0; index != numberOfPositions; ++index) {
                     PositionHolder current = possiblePositions.get(index);
                     int alphaBeta = AlphaBetaBlack.min(current.grid, current.whites, current.blacks, TEST_DEPTH, NEGATIVE_INFINITY, POSITIVE_INFINITY);

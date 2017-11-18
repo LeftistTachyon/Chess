@@ -47,28 +47,28 @@ public final class Rook extends Piece {
         final List<Tile> list = new ArrayList<>(MAX_NUMBER_OF_ROOK_MOVE_TILES);
         final int currentRow = getRow();
         final int currentColumn = getColumn();
-        for (int nextRow = currentRow - 1; nextRow >= 0; nextRow--) {
+        for (int nextRow = currentRow - 1; nextRow >= 0; --nextRow) {
             Tile tile = grid.getTile(nextRow, currentColumn);
             if (tile.isOccupied()) {
                 break;
             }
             list.add(tile);
         }
-        for (int nextRow = currentRow + 1; nextRow < LENGTH; nextRow++) {
+        for (int nextRow = currentRow + 1; nextRow < LENGTH; ++nextRow) {
             Tile tile = grid.getTile(nextRow, currentColumn);
             if (tile.isOccupied()) {
                 break;
             }
             list.add(tile);
         }
-        for (int nextColumn = currentColumn - 1; nextColumn >= 0; nextColumn--) {
+        for (int nextColumn = currentColumn - 1; nextColumn >= 0; --nextColumn) {
             Tile tile = grid.getTile(currentRow, nextColumn);
             if (tile.isOccupied()) {
                 break;
             }
             list.add(tile);
         }
-        for (int nextColumn = currentColumn + 1; nextColumn < LENGTH; nextColumn++) {
+        for (int nextColumn = currentColumn + 1; nextColumn < LENGTH; ++nextColumn) {
             Tile tile = grid.getTile(currentRow, nextColumn);
             if (tile.isOccupied()) {
                 break;
@@ -83,7 +83,7 @@ public final class Rook extends Piece {
         final List<Tile> list = new ArrayList<>(ChessConstants.NUMBER_OF_ROOK_AND_BISHOP_ATTACK_TILES);
         final int currentRow = getRow();
         final int currentColumn = getColumn();
-        for (int nextRow = currentRow - 1; nextRow >= 0; nextRow--) {
+        for (int nextRow = currentRow - 1; nextRow >= 0; --nextRow) {
             Tile tile = grid.getTile(nextRow, currentColumn);
             if (tile.isOccupied()) {
                 if (!isAlly(tile.getOccupant())) {
@@ -92,7 +92,7 @@ public final class Rook extends Piece {
                 break;
             }
         }
-        for (int nextRow = currentRow + 1; nextRow < LENGTH; nextRow++) {
+        for (int nextRow = currentRow + 1; nextRow < LENGTH; ++nextRow) {
             Tile tile = grid.getTile(nextRow, currentColumn);
             if (tile.isOccupied()) {
                 if (!isAlly(tile.getOccupant())) {
@@ -101,7 +101,7 @@ public final class Rook extends Piece {
                 break;
             }
         }
-        for (int nextColumn = currentColumn - 1; nextColumn >= 0; nextColumn--) {
+        for (int nextColumn = currentColumn - 1; nextColumn >= 0; --nextColumn) {
             Tile tile = grid.getTile(currentRow, nextColumn);
             if (tile.isOccupied()) {
                 if (!isAlly(tile.getOccupant())) {
@@ -110,7 +110,7 @@ public final class Rook extends Piece {
                 break;
             }
         }
-        for (int nextColumn = currentColumn + 1; nextColumn < LENGTH; nextColumn++) {
+        for (int nextColumn = currentColumn + 1; nextColumn < LENGTH; ++nextColumn) {
             Tile tile = grid.getTile(currentRow, nextColumn);
             if (tile.isOccupied()) {
                 if (!isAlly(tile.getOccupant())) {
@@ -127,13 +127,13 @@ public final class Rook extends Piece {
         final List<Tile> list = new ArrayList<>();
         final int currentRow = getRow();
         final int currentColumn = getColumn();
-        for (int nextRow = currentRow - 1; nextRow >= 0;) {
-            Tile tile = grid.getTile(nextRow--, currentColumn);
+        for (int nextRow = currentRow - 1; nextRow >= 0; --nextRow) {
+            Tile tile = grid.getTile(nextRow, currentColumn);
             list.add(tile);
             if (tile.isOccupied()) {
                 Piece occupant = tile.getOccupant();
                 if (occupant.isKing() && !isAlly(occupant)) {
-                    if (nextRow >= 0) {
+                    if (--nextRow >= 0) {
                         Tile pierceTile = grid.getTile(nextRow, currentColumn);
                         if (!pierceTile.isOccupied()) {
                             list.add(pierceTile);
@@ -143,13 +143,13 @@ public final class Rook extends Piece {
                 break;
             }
         }
-        for (int nextRow = currentRow + 1; nextRow < LENGTH;) {
-            Tile tile = grid.getTile(nextRow++, currentColumn);
+        for (int nextRow = currentRow + 1; nextRow < LENGTH; ++nextRow) {
+            Tile tile = grid.getTile(nextRow, currentColumn);
             list.add(tile);
             if (tile.isOccupied()) {
                 Piece occupant = tile.getOccupant();
                 if (occupant.isKing() && !isAlly(occupant)) {
-                    if (nextRow < LENGTH) {
+                    if (++nextRow < LENGTH) {
                         Tile pierceTile = grid.getTile(nextRow, currentColumn);
                         if (!pierceTile.isOccupied()) {
                             list.add(pierceTile);
@@ -159,13 +159,13 @@ public final class Rook extends Piece {
                 break;
             }
         }
-        for (int nextColumn = currentColumn - 1; nextColumn >= 0;) {
-            Tile tile = grid.getTile(currentRow, nextColumn--);
+        for (int nextColumn = currentColumn - 1; nextColumn >= 0; --nextColumn) {
+            Tile tile = grid.getTile(currentRow, nextColumn);
             list.add(tile);
             if (tile.isOccupied()) {
                 Piece occupant = tile.getOccupant();
                 if (occupant.isKing() && !isAlly(occupant)) {
-                    if (nextColumn >= 0) {
+                    if (--nextColumn >= 0) {
                         Tile pierceTile = grid.getTile(currentRow, nextColumn);
                         if (!pierceTile.isOccupied()) {
                             list.add(pierceTile);
@@ -175,13 +175,13 @@ public final class Rook extends Piece {
                 break;
             }
         }
-        for (int nextColumn = currentColumn + 1; nextColumn < LENGTH;) {
-            Tile tile = grid.getTile(currentRow, nextColumn++);
+        for (int nextColumn = currentColumn + 1; nextColumn < LENGTH; ++nextColumn) {
+            Tile tile = grid.getTile(currentRow, nextColumn);
             list.add(tile);
             if (tile.isOccupied()) {
                 Piece occupant = tile.getOccupant();
                 if (occupant.isKing() && !isAlly(occupant)) {
-                    if (nextColumn < LENGTH) {
+                    if (++nextColumn < LENGTH) {
                         Tile pierceTile = grid.getTile(currentRow, nextColumn);
                         if (!pierceTile.isOccupied()) {
                             list.add(pierceTile);
@@ -198,13 +198,13 @@ public final class Rook extends Piece {
     public void setProtectedTiles(Grid grid) {
         final int currentRow = getRow();
         final int currentColumn = getColumn();
-        for (int nextRow = currentRow - 1; nextRow >= 0;) {
-            Tile tile = grid.getTile(nextRow--, currentColumn);
+        for (int nextRow = currentRow - 1; nextRow >= 0; --nextRow) {
+            Tile tile = grid.getTile(nextRow, currentColumn);
             tile.setProtectedBy(this);
             if (tile.isOccupied()) {
                 Piece occupant = tile.getOccupant();
                 if (occupant.isKing() && !isAlly(occupant)) {
-                    if (nextRow >= 0) {
+                    if (--nextRow >= 0) {
                         Tile pierceTile = grid.getTile(nextRow, currentColumn);
                         if (!pierceTile.isOccupied()) {
                             pierceTile.setProtectedBy(this);
@@ -214,13 +214,13 @@ public final class Rook extends Piece {
                 break;
             }
         }
-        for (int nextRow = currentRow + 1; nextRow < LENGTH;) {
-            Tile tile = grid.getTile(nextRow++, currentColumn);
+        for (int nextRow = currentRow + 1; nextRow < LENGTH; ++nextRow) {
+            Tile tile = grid.getTile(nextRow, currentColumn);
             tile.setProtectedBy(this);
             if (tile.isOccupied()) {
                 Piece occupant = tile.getOccupant();
                 if (occupant.isKing() && !isAlly(occupant)) {
-                    if (nextRow < LENGTH) {
+                    if (++nextRow < LENGTH) {
                         Tile pierceTile = grid.getTile(nextRow, currentColumn);
                         if (!pierceTile.isOccupied()) {
                             pierceTile.setProtectedBy(this);
@@ -230,13 +230,13 @@ public final class Rook extends Piece {
                 break;
             }
         }
-        for (int nextColumn = currentColumn - 1; nextColumn >= 0;) {
-            Tile tile = grid.getTile(currentRow, nextColumn--);
+        for (int nextColumn = currentColumn - 1; nextColumn >= 0; --nextColumn) {
+            Tile tile = grid.getTile(currentRow, nextColumn);
             tile.setProtectedBy(this);
             if (tile.isOccupied()) {
                 Piece occupant = tile.getOccupant();
                 if (occupant.isKing() && !isAlly(occupant)) {
-                    if (nextColumn >= 0) {
+                    if (--nextColumn >= 0) {
                         Tile pierceTile = grid.getTile(currentRow, nextColumn);
                         if (!pierceTile.isOccupied()) {
                             pierceTile.setProtectedBy(this);
@@ -246,13 +246,13 @@ public final class Rook extends Piece {
                 break;
             }
         }
-        for (int nextColumn = currentColumn + 1; nextColumn < LENGTH;) {
-            Tile tile = grid.getTile(currentRow, nextColumn++);
+        for (int nextColumn = currentColumn + 1; nextColumn < LENGTH; ++nextColumn) {
+            Tile tile = grid.getTile(currentRow, nextColumn);
             tile.setProtectedBy(this);
             if (tile.isOccupied()) {
                 Piece occupant = tile.getOccupant();
                 if (occupant.isKing() && !isAlly(occupant)) {
-                    if (nextColumn < LENGTH) {
+                    if (++nextColumn < LENGTH) {
                         Tile pierceTile = grid.getTile(currentRow, nextColumn);
                         if (!pierceTile.isOccupied()) {
                             pierceTile.setProtectedBy(this);
@@ -269,13 +269,13 @@ public final class Rook extends Piece {
         int count = 0;
         final int currentRow = getRow();
         final int currentColumn = getColumn();
-        for (int nextRow = currentRow - 1; nextRow >= 0;) {
-            Tile tile = grid.getTile(nextRow--, currentColumn);
+        for (int nextRow = currentRow - 1; nextRow >= 0; --nextRow) {
+            Tile tile = grid.getTile(nextRow, currentColumn);
             ++count;
             if (tile.isOccupied()) {
                 Piece occupant = tile.getOccupant();
                 if (occupant.isKing() && !isAlly(occupant)) {
-                    if (nextRow >= 0) {
+                    if (--nextRow >= 0) {
                         if (!grid.getTile(nextRow, currentColumn).isOccupied()) {
                             ++count;
                         }
@@ -284,13 +284,13 @@ public final class Rook extends Piece {
                 break;
             }
         }
-        for (int nextRow = currentRow + 1; nextRow < LENGTH;) {
-            Tile tile = grid.getTile(nextRow++, currentColumn);
+        for (int nextRow = currentRow + 1; nextRow < LENGTH; ++nextRow) {
+            Tile tile = grid.getTile(nextRow, currentColumn);
             ++count;
             if (tile.isOccupied()) {
                 Piece occupant = tile.getOccupant();
                 if (occupant.isKing() && !isAlly(occupant)) {
-                    if (nextRow < LENGTH) {
+                    if (++nextRow < LENGTH) {
                         if (!grid.getTile(nextRow, currentColumn).isOccupied()) {
                             ++count;
                         }
@@ -299,13 +299,13 @@ public final class Rook extends Piece {
                 break;
             }
         }
-        for (int nextColumn = currentColumn - 1; nextColumn >= 0;) {
-            Tile tile = grid.getTile(currentRow, nextColumn--);
+        for (int nextColumn = currentColumn - 1; nextColumn >= 0; --nextColumn) {
+            Tile tile = grid.getTile(currentRow, nextColumn);
             ++count;
             if (tile.isOccupied()) {
                 Piece occupant = tile.getOccupant();
                 if (occupant.isKing() && !isAlly(occupant)) {
-                    if (nextColumn >= 0) {
+                    if (--nextColumn >= 0) {
                         if (!grid.getTile(currentRow, nextColumn).isOccupied()) {
                             ++count;
                         }
@@ -314,13 +314,13 @@ public final class Rook extends Piece {
                 break;
             }
         }
-        for (int nextColumn = currentColumn + 1; nextColumn < LENGTH;) {
-            Tile tile = grid.getTile(currentRow, nextColumn++);
+        for (int nextColumn = currentColumn + 1; nextColumn < LENGTH; ++nextColumn) {
+            Tile tile = grid.getTile(currentRow, nextColumn);
             ++count;
             if (tile.isOccupied()) {
                 Piece occupant = tile.getOccupant();
                 if (occupant.isKing() && !isAlly(occupant)) {
-                    if (nextColumn < LENGTH) {
+                    if (++nextColumn < LENGTH) {
                         if (!grid.getTile(currentRow, nextColumn).isOccupied()) {
                             ++count;
                         }

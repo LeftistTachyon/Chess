@@ -51,29 +51,29 @@ public final class Bishop extends Piece {
         final List<Tile> list = new ArrayList<>(MAX_NUMBER_OF_BISHOP_MOVE_TILES);
         final int currentRow = getRow();
         final int currentColumn = getColumn();
-        for (int nextRow = currentRow - 1, nextColumn = currentColumn - 1; nextRow >= 0 && nextColumn >= 0;) {
-            Tile tile = grid.getTile(nextRow--, nextColumn--);
+        for (int nextRow = currentRow - 1, nextColumn = currentColumn - 1; nextRow >= 0 && nextColumn >= 0; --nextRow, --nextColumn) {
+            Tile tile = grid.getTile(nextRow, nextColumn);
             if (tile.isOccupied()) {
                 break;
             }
             list.add(tile);
         }
-        for (int nextRow = currentRow - 1, nextColumn = currentColumn + 1; nextRow >= 0 && nextColumn < LENGTH;) {
-            Tile tile = grid.getTile(nextRow--, nextColumn++);
+        for (int nextRow = currentRow - 1, nextColumn = currentColumn + 1; nextRow >= 0 && nextColumn < LENGTH; --nextRow, ++nextColumn) {
+            Tile tile = grid.getTile(nextRow, nextColumn);
             if (tile.isOccupied()) {
                 break;
             }
             list.add(tile);
         }
-        for (int nextRow = currentRow + 1, nextColumn = currentColumn - 1; nextRow < LENGTH && nextColumn >= 0;) {
-            Tile tile = grid.getTile(nextRow++, nextColumn--);
+        for (int nextRow = currentRow + 1, nextColumn = currentColumn - 1; nextRow < LENGTH && nextColumn >= 0; ++nextRow, --nextColumn) {
+            Tile tile = grid.getTile(nextRow, nextColumn);
             if (tile.isOccupied()) {
                 break;
             }
             list.add(tile);
         }
-        for (int nextRow = currentRow + 1, nextColumn = currentColumn + 1; nextRow < LENGTH && nextColumn < LENGTH;) {
-            Tile tile = grid.getTile(nextRow++, nextColumn++);
+        for (int nextRow = currentRow + 1, nextColumn = currentColumn + 1; nextRow < LENGTH && nextColumn < LENGTH; ++nextRow, ++nextColumn) {
+            Tile tile = grid.getTile(nextRow, nextColumn);
             if (tile.isOccupied()) {
                 break;
             }
@@ -87,8 +87,8 @@ public final class Bishop extends Piece {
         final List<Tile> list = new ArrayList<>(ChessConstants.NUMBER_OF_ROOK_AND_BISHOP_ATTACK_TILES);
         final int currentRow = getRow();
         final int currentColumn = getColumn();
-        for (int nextRow = currentRow - 1, nextColumn = currentColumn - 1; nextRow >= 0 && nextColumn >= 0;) {
-            Tile tile = grid.getTile(nextRow--, nextColumn--);
+        for (int nextRow = currentRow - 1, nextColumn = currentColumn - 1; nextRow >= 0 && nextColumn >= 0; --nextRow, --nextColumn) {
+            Tile tile = grid.getTile(nextRow, nextColumn);
             if (tile.isOccupied()) {
                 if (!isAlly(tile.getOccupant())) {
                     list.add(tile);
@@ -96,8 +96,8 @@ public final class Bishop extends Piece {
                 break;
             }
         }
-        for (int nextRow = currentRow - 1, nextColumn = currentColumn + 1; nextRow >= 0 && nextColumn < LENGTH;) {
-            Tile tile = grid.getTile(nextRow--, nextColumn++);
+        for (int nextRow = currentRow - 1, nextColumn = currentColumn + 1; nextRow >= 0 && nextColumn < LENGTH; --nextRow, ++nextColumn) {
+            Tile tile = grid.getTile(nextRow, nextColumn);
             if (tile.isOccupied()) {
                 if (!isAlly(tile.getOccupant())) {
                     list.add(tile);
@@ -105,8 +105,8 @@ public final class Bishop extends Piece {
                 break;
             }
         }
-        for (int nextRow = currentRow + 1, nextColumn = currentColumn - 1; nextRow < LENGTH && nextColumn >= 0;) {
-            Tile tile = grid.getTile(nextRow++, nextColumn--);
+        for (int nextRow = currentRow + 1, nextColumn = currentColumn - 1; nextRow < LENGTH && nextColumn >= 0; ++nextRow, --nextColumn) {
+            Tile tile = grid.getTile(nextRow, nextColumn);
             if (tile.isOccupied()) {
                 if (!isAlly(tile.getOccupant())) {
                     list.add(tile);
@@ -114,8 +114,8 @@ public final class Bishop extends Piece {
                 break;
             }
         }
-        for (int nextRow = currentRow + 1, nextColumn = currentColumn + 1; nextRow < LENGTH && nextColumn < LENGTH;) {
-            Tile tile = grid.getTile(nextRow++, nextColumn++);
+        for (int nextRow = currentRow + 1, nextColumn = currentColumn + 1; nextRow < LENGTH && nextColumn < LENGTH; ++nextRow, ++nextColumn) {
+            Tile tile = grid.getTile(nextRow, nextColumn);
             if (tile.isOccupied()) {
                 if (!isAlly(tile.getOccupant())) {
                     list.add(tile);
@@ -123,65 +123,6 @@ public final class Bishop extends Piece {
                 break;
             }
         }
-        return list;
-    }
-    
-    private static final int jump = 9;
-    
-    //this wont work, as diagonals need row and column indexing, and your direction is off
-    private List<Tile> getAttackTilesHelper(Grid grid) {
-        final List<Tile> list = new ArrayList<>(ChessConstants.NUMBER_OF_ROOK_AND_BISHOP_ATTACK_TILES);
-        final int index = getIndex();
-        //0,0 -> 0 
-        //1,1 -> 8
-        //jump by 9's
-        
-        //up-left diagonal
-        for (int upLeftIndex = index - jump; upLeftIndex >= 0; upLeftIndex -= jump) {
-            Tile tile = grid.getTile(upLeftIndex);
-            if (tile.isOccupied()) {
-                if (!isAlly(tile.getOccupant())) {
-                    list.add(tile);
-                }
-                break;
-            }
-        }
-        
-        //up-right diagonal
-        for (int upRightIndex = index - 7; upRightIndex >= 7; upRightIndex -= 7) {
-            Tile tile = grid.getTile(upRightIndex);
-            if (tile.isOccupied()) {
-                if (!isAlly(tile.getOccupant())) {
-                    list.add(tile);
-                }
-                break;
-            }
-        }
-        
-        //down-right diagonal
-        for (int downRightIndex = index + jump; downRightIndex <= 63; downRightIndex += jump) {
-            Tile tile = grid.getTile(downRightIndex);
-            if (tile.isOccupied()) {
-                if (!isAlly(tile.getOccupant())) {
-                    list.add(tile);
-                }
-                break;
-            }
-        }
-        
-        //down-left
-        for (int downLeftIndex = index + 7; downLeftIndex <= 56 ; downLeftIndex += 7) {
-            Tile tile = grid.getTile(downLeftIndex);
-            if (tile.isOccupied()) {
-                if (!isAlly(tile.getOccupant())) {
-                    list.add(tile);
-                }
-                break;
-            }
-        }
-        
-        
-        
         return list;
     }
 
@@ -190,13 +131,13 @@ public final class Bishop extends Piece {
         final List<Tile> list = new ArrayList<>();
         final int currentRow = getRow();
         final int currentColumn = getColumn();
-        for (int nextRow = currentRow - 1, nextColumn = currentColumn - 1; nextRow >= 0 && nextColumn >= 0;) {
-            Tile tile = grid.getTile(nextRow--, nextColumn--);
+        for (int nextRow = currentRow - 1, nextColumn = currentColumn - 1; nextRow >= 0 && nextColumn >= 0; --nextRow, --nextColumn) {
+            Tile tile = grid.getTile(nextRow, nextColumn);
             list.add(tile);
             if (tile.isOccupied()) {
                 Piece occupant = tile.getOccupant();
                 if (occupant.isKing() && !isAlly(occupant)) {
-                    if (nextRow >= 0 && nextColumn >= 0) {
+                    if (--nextRow >= 0 && --nextColumn >= 0) {
                         Tile pierceTile = grid.getTile(nextRow, nextColumn);
                         if (!pierceTile.isOccupied()) {
                             list.add(pierceTile);
@@ -206,13 +147,13 @@ public final class Bishop extends Piece {
                 break;
             }
         }
-        for (int nextRow = currentRow - 1, nextColumn = currentColumn + 1; nextRow >= 0 && nextColumn < LENGTH;) {
-            Tile tile = grid.getTile(nextRow--, nextColumn++);
+        for (int nextRow = currentRow - 1, nextColumn = currentColumn + 1; nextRow >= 0 && nextColumn < LENGTH; --nextRow, ++nextColumn) {
+            Tile tile = grid.getTile(nextRow, nextColumn);
             list.add(tile);
             if (tile.isOccupied()) {
                 Piece occupant = tile.getOccupant();
                 if (occupant.isKing() && !isAlly(occupant)) {
-                    if (nextRow >= 0 && nextColumn < LENGTH) {
+                    if (--nextRow >= 0 && ++nextColumn < LENGTH) {
                         Tile pierceTile = grid.getTile(nextRow, nextColumn);
                         if (!pierceTile.isOccupied()) {
                             list.add(pierceTile);
@@ -222,13 +163,13 @@ public final class Bishop extends Piece {
                 break;
             }
         }
-        for (int nextRow = currentRow + 1, nextColumn = currentColumn - 1; nextRow < LENGTH && nextColumn >= 0;) {
-            Tile tile = grid.getTile(nextRow++, nextColumn--);
+        for (int nextRow = currentRow + 1, nextColumn = currentColumn - 1; nextRow < LENGTH && nextColumn >= 0; ++nextRow, --nextColumn) {
+            Tile tile = grid.getTile(nextRow, nextColumn);
             list.add(tile);
             if (tile.isOccupied()) {
                 Piece occupant = tile.getOccupant();
                 if (occupant.isKing() && !isAlly(occupant)) {
-                    if (nextRow < LENGTH && nextColumn >= 0) {
+                    if (++nextRow < LENGTH && --nextColumn >= 0) {
                         Tile pierceTile = grid.getTile(nextRow, nextColumn);
                         if (!pierceTile.isOccupied()) {
                             list.add(pierceTile);
@@ -238,13 +179,13 @@ public final class Bishop extends Piece {
                 break;
             }
         }
-        for (int nextRow = currentRow + 1, nextColumn = currentColumn + 1; nextRow < LENGTH && nextColumn < LENGTH;) {
-            Tile tile = grid.getTile(nextRow++, nextColumn++);
+        for (int nextRow = currentRow + 1, nextColumn = currentColumn + 1; nextRow < LENGTH && nextColumn < LENGTH; ++nextRow, ++nextColumn) {
+            Tile tile = grid.getTile(nextRow, nextColumn);
             list.add(tile);
             if (tile.isOccupied()) {
                 Piece occupant = tile.getOccupant();
                 if (occupant.isKing() && !isAlly(occupant)) {
-                    if (nextRow < LENGTH && nextColumn < LENGTH) {
+                    if (++nextRow < LENGTH && ++nextColumn < LENGTH) {
                         Tile pierceTile = grid.getTile(nextRow, nextColumn);
                         if (!pierceTile.isOccupied()) {
                             list.add(pierceTile);
@@ -261,13 +202,13 @@ public final class Bishop extends Piece {
     public void setProtectedTiles(Grid grid) {
         final int currentRow = getRow();
         final int currentColumn = getColumn();
-        for (int nextRow = currentRow - 1, nextColumn = currentColumn - 1; nextRow >= 0 && nextColumn >= 0;) {
-            Tile tile = grid.getTile(nextRow--, nextColumn--);
+        for (int nextRow = currentRow - 1, nextColumn = currentColumn - 1; nextRow >= 0 && nextColumn >= 0; --nextRow, --nextColumn) {
+            Tile tile = grid.getTile(nextRow, nextColumn);
             tile.setProtectedBy(this);
             if (tile.isOccupied()) {
                 Piece occupant = tile.getOccupant();
                 if (occupant.isKing() && !isAlly(occupant)) {
-                    if (nextRow >= 0 && nextColumn >= 0) {
+                    if (--nextRow >= 0 && --nextColumn >= 0) {
                         Tile pierceTile = grid.getTile(nextRow, nextColumn);
                         if (!pierceTile.isOccupied()) {
                             pierceTile.setProtectedBy(this);
@@ -277,13 +218,13 @@ public final class Bishop extends Piece {
                 break;
             }
         }
-        for (int nextRow = currentRow - 1, nextColumn = currentColumn + 1; nextRow >= 0 && nextColumn < LENGTH;) {
-            Tile tile = grid.getTile(nextRow--, nextColumn++);
+        for (int nextRow = currentRow - 1, nextColumn = currentColumn + 1; nextRow >= 0 && nextColumn < LENGTH; --nextRow, ++nextColumn) {
+            Tile tile = grid.getTile(nextRow, nextColumn);
             tile.setProtectedBy(this);
             if (tile.isOccupied()) {
                 Piece occupant = tile.getOccupant();
                 if (occupant.isKing() && !isAlly(occupant)) {
-                    if (nextRow >= 0 && nextColumn < LENGTH) {
+                    if (--nextRow >= 0 && ++nextColumn < LENGTH) {
                         Tile pierceTile = grid.getTile(nextRow, nextColumn);
                         if (!pierceTile.isOccupied()) {
                             pierceTile.setProtectedBy(this);
@@ -293,13 +234,13 @@ public final class Bishop extends Piece {
                 break;
             }
         }
-        for (int nextRow = currentRow + 1, nextColumn = currentColumn - 1; nextRow < LENGTH && nextColumn >= 0;) {
-            Tile tile = grid.getTile(nextRow++, nextColumn--);
+        for (int nextRow = currentRow + 1, nextColumn = currentColumn - 1; nextRow < LENGTH && nextColumn >= 0; ++nextRow, --nextColumn) {
+            Tile tile = grid.getTile(nextRow, nextColumn);
             tile.setProtectedBy(this);
             if (tile.isOccupied()) {
                 Piece occupant = tile.getOccupant();
                 if (occupant.isKing() && !isAlly(occupant)) {
-                    if (nextRow < LENGTH && nextColumn >= 0) {
+                    if (++nextRow < LENGTH && --nextColumn >= 0) {
                         Tile pierceTile = grid.getTile(nextRow, nextColumn);
                         if (!pierceTile.isOccupied()) {
                             pierceTile.setProtectedBy(this);
@@ -309,13 +250,13 @@ public final class Bishop extends Piece {
                 break;
             }
         }
-        for (int nextRow = currentRow + 1, nextColumn = currentColumn + 1; nextRow < LENGTH && nextColumn < LENGTH;) {
-            Tile tile = grid.getTile(nextRow++, nextColumn++);
+        for (int nextRow = currentRow + 1, nextColumn = currentColumn + 1; nextRow < LENGTH && nextColumn < LENGTH; ++nextRow, ++nextColumn) {
+            Tile tile = grid.getTile(nextRow, nextColumn);
             tile.setProtectedBy(this);
             if (tile.isOccupied()) {
                 Piece occupant = tile.getOccupant();
                 if (occupant.isKing() && !isAlly(occupant)) {
-                    if (nextRow < LENGTH && nextColumn < LENGTH) {
+                    if (++nextRow < LENGTH && ++nextColumn < LENGTH) {
                         Tile pierceTile = grid.getTile(nextRow, nextColumn);
                         if (!pierceTile.isOccupied()) {
                             pierceTile.setProtectedBy(this);
@@ -332,13 +273,13 @@ public final class Bishop extends Piece {
         int count = 0;
         final int currentRow = getRow();
         final int currentColumn = getColumn();
-        for (int nextRow = currentRow - 1, nextColumn = currentColumn - 1; nextRow >= 0 && nextColumn >= 0;) {
-            Tile tile = grid.getTile(nextRow--, nextColumn--);
+        for (int nextRow = currentRow - 1, nextColumn = currentColumn - 1; nextRow >= 0 && nextColumn >= 0; --nextRow, --nextColumn) {
+            Tile tile = grid.getTile(nextRow, nextColumn);
             ++count;
             if (tile.isOccupied()) {
                 Piece occupant = tile.getOccupant();
                 if (occupant.isKing() && !isAlly(occupant)) {
-                    if (nextRow >= 0 && nextColumn >= 0) {
+                    if (--nextRow >= 0 && --nextColumn >= 0) {
                         if (!grid.getTile(nextRow, nextColumn).isOccupied()) {
                             ++count;
                         }
@@ -347,13 +288,13 @@ public final class Bishop extends Piece {
                 break;
             }
         }
-        for (int nextRow = currentRow - 1, nextColumn = currentColumn + 1; nextRow >= 0 && nextColumn < LENGTH;) {
-            Tile tile = grid.getTile(nextRow--, nextColumn++);
+        for (int nextRow = currentRow - 1, nextColumn = currentColumn + 1; nextRow >= 0 && nextColumn < LENGTH; --nextRow, ++nextColumn) {
+            Tile tile = grid.getTile(nextRow, nextColumn);
             ++count;
             if (tile.isOccupied()) {
                 Piece occupant = tile.getOccupant();
                 if (occupant.isKing() && !isAlly(occupant)) {
-                    if (nextRow >= 0 && nextColumn < LENGTH) {
+                    if (--nextRow >= 0 && ++nextColumn < LENGTH) {
                         if (!grid.getTile(nextRow, nextColumn).isOccupied()) {
                             ++count;
                         }
@@ -362,13 +303,13 @@ public final class Bishop extends Piece {
                 break;
             }
         }
-        for (int nextRow = currentRow + 1, nextColumn = currentColumn - 1; nextRow < LENGTH && nextColumn >= 0;) {
-            Tile tile = grid.getTile(nextRow++, nextColumn--);
+        for (int nextRow = currentRow + 1, nextColumn = currentColumn - 1; nextRow < LENGTH && nextColumn >= 0; ++nextRow, --nextColumn) {
+            Tile tile = grid.getTile(nextRow, nextColumn);
             ++count;
             if (tile.isOccupied()) {
                 Piece occupant = tile.getOccupant();
                 if (occupant.isKing() && !isAlly(occupant)) {
-                    if (nextRow < LENGTH && nextColumn >= 0) {
+                    if (++nextRow < LENGTH && --nextColumn >= 0) {
                         if (!grid.getTile(nextRow, nextColumn).isOccupied()) {
                             ++count;
                         }
@@ -377,13 +318,13 @@ public final class Bishop extends Piece {
                 break;
             }
         }
-        for (int nextRow = currentRow + 1, nextColumn = currentColumn + 1; nextRow < LENGTH && nextColumn < LENGTH;) {
-            Tile tile = grid.getTile(nextRow++, nextColumn++);
+        for (int nextRow = currentRow + 1, nextColumn = currentColumn + 1; nextRow < LENGTH && nextColumn < LENGTH; ++nextRow, ++nextColumn) {
+            Tile tile = grid.getTile(nextRow, nextColumn);
             ++count;
             if (tile.isOccupied()) {
                 Piece occupant = tile.getOccupant();
                 if (occupant.isKing() && !isAlly(occupant)) {
-                    if (nextRow < LENGTH && nextColumn < LENGTH) {
+                    if (++nextRow < LENGTH && ++nextColumn < LENGTH) {
                         if (!grid.getTile(nextRow, nextColumn).isOccupied()) {
                             ++count;
                         }
@@ -394,7 +335,7 @@ public final class Bishop extends Piece {
         }
         return count;
     }
-    
+
     public int getNumberOfTilesTowardsEnemyKing(Grid grid) {
         final int currentRow = getRow();
         final int currentColumn = getColumn();

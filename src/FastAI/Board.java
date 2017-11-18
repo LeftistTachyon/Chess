@@ -31,7 +31,7 @@ public class Board {
     long blackProtections; //must initialize manually
 
     public Board() {
-        whitePawns =   0b00000000_00000000_00000000_00000000_00000000_00000000_11111111_00000000L;
+        whitePawns =   0b00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000L;
         whiteKnights = 0b00000000_00000000_00000000_00000000_00000000_00000000_00000000_01000010L;
         whiteBishops = 0b00000000_00000000_00000000_00000000_00000000_00000000_00000000_00100100L;
         whiteRooks =   0b00000000_00000000_00000000_00000000_00000000_00000000_00000000_10000001L;
@@ -201,6 +201,6 @@ public class Board {
         System.out.println(bitBoard(board.blackPieces));
         System.out.println(board);
         System.out.println(L);
-        System.out.println(Bishop.generateAttack(board, 2, true));
+        System.out.println(Bishop.generateAttack(board, 58, true));
     }
 }

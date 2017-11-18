@@ -154,6 +154,7 @@ final class MinMaxWhite {
                     grid.setProtections(whites, blacks);
                 }
             }
+            /*
             if (black.isPawn()) {
                 final List<Tile> enPassantTiles = ((Pawn) black).getEnPassantTiles(grid);
                 for (int index = (enPassantTiles.size() - 1); index >= 0; --index) {
@@ -204,6 +205,7 @@ final class MinMaxWhite {
                     }
                 }
             }
+            */
         }
 
         for (int pieceIndex = 0; pieceIndex != numberOfBlackPieces; ++pieceIndex) {
@@ -388,6 +390,7 @@ final class MinMaxWhite {
                     grid.setProtections(whites, blacks);
                 }
             }
+            /*
             if (white.isPawn()) {
                 final List<Tile> enPassantTiles = ((Pawn) white).getEnPassantTiles(grid);
                 for (int index = (enPassantTiles.size() - 1); index >= 0; --index) {
@@ -438,6 +441,7 @@ final class MinMaxWhite {
                     }
                 }
             }
+            */
         }
 
         for (int pieceIndex = 0; pieceIndex != numberOfWhitePieces; ++pieceIndex) {

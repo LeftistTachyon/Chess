@@ -17,28 +17,28 @@ public class Bishop {
         int currentRow = ChessConstants.getRow(currentIndex);
         int currentColumn = ChessConstants.getColumn(currentIndex);
         if (color) {
-            for (int nextRow = currentRow - 1, nextColumn = currentColumn - 1; nextRow >= 0 && nextColumn >= 0;) {
+            for (int nextRow = currentRow - 1, nextColumn = currentColumn - 1; nextRow >= 0 && nextColumn >= 0; --nextRow, --nextColumn) {
                 int index = ChessConstants.getLocation(nextRow, nextColumn);
                 if ((board.blackPieces & (1L << index)) != 0) {
                     positions.add(index); 
                     break;
                 }
             }
-            for (int nextRow = currentRow - 1, nextColumn = currentColumn + 1; nextRow >= 0 && nextColumn < LENGTH;) {
+            for (int nextRow = currentRow - 1, nextColumn = currentColumn + 1; nextRow >= 0 && nextColumn < LENGTH; --nextRow, ++nextColumn) {
                 int index = ChessConstants.getLocation(nextRow, nextColumn);
                 if ((board.blackPieces & (1L << index)) != 0) {
                     positions.add(index); 
                     break;
                 }
             }
-            for (int nextRow = currentRow + 1, nextColumn = currentColumn - 1; nextRow < LENGTH && nextColumn >= 0;) {
+            for (int nextRow = currentRow + 1, nextColumn = currentColumn - 1; nextRow < LENGTH && nextColumn >= 0; ++nextRow, --nextColumn) {
                 int index = ChessConstants.getLocation(nextRow, nextColumn);
                 if ((board.blackPieces & (1L << index)) != 0) {
                     positions.add(index); 
                     break;
                 }
             }
-            for (int nextRow = currentRow + 1, nextColumn = currentColumn + 1; nextRow < LENGTH && nextColumn < LENGTH;) {
+            for (int nextRow = currentRow + 1, nextColumn = currentColumn + 1; nextRow < LENGTH && nextColumn < LENGTH; ++nextRow, ++nextColumn) {
                 int index = ChessConstants.getLocation(nextRow, nextColumn);
                 if ((board.blackPieces & (1L << index)) != 0) {
                     positions.add(index); 

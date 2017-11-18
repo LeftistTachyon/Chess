@@ -69,7 +69,7 @@ public final class King extends Piece {
         Piece leftRook = grid.getTile(currentRow, 0).getOccupant();
         if (leftRook != null && !leftRook.hasMoved() && leftRook.isRook() && isAlly(leftRook)) {
             boolean blocked = false;
-            for (int column = 1; column < 4; column++) {
+            for (int column = 1; column < 4; ++column) {
                 Tile path = grid.getTile(currentRow, column);
                 if (path.protectedByEnemy(this) || path.isOccupied()) {
                     blocked = true;
@@ -83,7 +83,7 @@ public final class King extends Piece {
         Piece rightRook = grid.getTile(currentRow, 7).getOccupant();
         if (rightRook != null && !rightRook.hasMoved() && rightRook.isRook() && isAlly(rightRook)) {
             boolean blocked = false;
-            for (int column = 5; column < 7; column++) {
+            for (int column = 5; column < 7; ++column) {
                 Tile path = grid.getTile(currentRow, column);
                 if (path.protectedByEnemy(this) || path.isOccupied()) {
                     blocked = true;

@@ -7,6 +7,7 @@ import static Util.Constants.NEGATIVE_INFINITY;
 import static Util.Constants.POSITIVE_INFINITY;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 
 final class Tester {
@@ -25,535 +26,46 @@ final class Tester {
 
     static final void check(Grid grid1, Grid grid2, List<Piece> list1, List<Piece> list2) {
         grid1.equals(grid2);
+        comparePieces(list1, list2);
+    }
+    
+    private static void comparePieces(List<Piece> list1, List<Piece> list2) {
         if (!list1.equals(list2)) {
             throw new Error();
         }
     }
 
     public static final void main(String... args) {
-        String s = "{\n" +
-"            for (int index = 0; index < numberOfWhiteQueens; ++index) {\n" +
-"                Queen piece = board.whiteQueens.get(index);\n" +
-"                final int currentRow = piece.getRow();\n" +
-"                final int currentColumn = piece.getColumn();\n" +
-"                Tile previousTile = grid.getTile(currentRow, currentColumn);\n" +
-"                for (int nextRow = currentRow - 1; nextRow >= 0; nextRow--) {\n" +
-"                    Tile tile = grid.getTile(nextRow, currentColumn);\n" +
-"                    if (tile.isOccupied()) {\n" +
-"                        if (!piece.isAlly(tile.getOccupant())) {\n" +
-"                            \n" +
-"                        }\n" +
-"                        break;\n" +
-"                    }\n" +
-"                }\n" +
-"                for (int nextRow = currentRow + 1; nextRow < LENGTH; nextRow++) {\n" +
-"                    Tile tile = grid.getTile(nextRow, currentColumn);\n" +
-"                    if (tile.isOccupied()) {\n" +
-"                        if (!piece.isAlly(tile.getOccupant())) {\n" +
-"\n" +
-"                        }\n" +
-"                        break;\n" +
-"                    }\n" +
-"                }\n" +
-"                for (int nextColumn = currentColumn - 1; nextColumn >= 0; nextColumn--) {\n" +
-"                    Tile tile = grid.getTile(currentRow, nextColumn);\n" +
-"                    if (tile.isOccupied()) {\n" +
-"                        if (!piece.isAlly(tile.getOccupant())) {\n" +
-"\n" +
-"                        }\n" +
-"                        break;\n" +
-"                    }\n" +
-"                }\n" +
-"                for (int nextColumn = currentColumn + 1; nextColumn < LENGTH; nextColumn++) {\n" +
-"                    Tile tile = grid.getTile(currentRow, nextColumn);\n" +
-"                    if (tile.isOccupied()) {\n" +
-"                        if (!piece.isAlly(tile.getOccupant())) {\n" +
-"\n" +
-"                        }\n" +
-"                        break;\n" +
-"                    }\n" +
-"                }\n" +
-"                for (int nextRow = currentRow - 1, nextColumn = currentColumn - 1; nextRow >= 0 && nextColumn >= 0;) {\n" +
-"                    Tile tile = grid.getTile(nextRow--, nextColumn--);\n" +
-"                    if (tile.isOccupied()) {\n" +
-"                        if (!piece.isAlly(tile.getOccupant())) {\n" +
-"\n" +
-"                        }\n" +
-"                        break;\n" +
-"                    }\n" +
-"                }\n" +
-"                for (int nextRow = currentRow - 1, nextColumn = currentColumn + 1; nextRow >= 0 && nextColumn < LENGTH;) {\n" +
-"                    Tile tile = grid.getTile(nextRow--, nextColumn++);\n" +
-"                    if (tile.isOccupied()) {\n" +
-"                        if (!piece.isAlly(tile.getOccupant())) {\n" +
-"\n" +
-"                        }\n" +
-"                        break;\n" +
-"                    }\n" +
-"                }\n" +
-"                for (int nextRow = currentRow + 1, nextColumn = currentColumn - 1; nextRow < LENGTH && nextColumn >= 0;) {\n" +
-"                    Tile tile = grid.getTile(nextRow++, nextColumn--);\n" +
-"                    if (tile.isOccupied()) {\n" +
-"                        if (!piece.isAlly(tile.getOccupant())) {\n" +
-"\n" +
-"                        }\n" +
-"                        break;\n" +
-"                    }\n" +
-"                }\n" +
-"                for (int nextRow = currentRow + 1, nextColumn = currentColumn + 1; nextRow < LENGTH && nextColumn < LENGTH;) {\n" +
-"                    Tile tile = grid.getTile(nextRow++, nextColumn++);\n" +
-"                    if (tile.isOccupied()) {\n" +
-"                        if (!piece.isAlly(tile.getOccupant())) {\n" +
-"\n" +
-"                        }\n" +
-"                        break;\n" +
-"                    }\n" +
-"                }\n" +
-"            }\n" +
-"\n" +
-"            for (int index = 0; index < numberOfWhiteRooks; ++index) {\n" +
-"                Rook piece = board.whiteRooks.get(index);\n" +
-"                final int currentRow = piece.getRow();\n" +
-"                final int currentColumn = piece.getColumn();\n" +
-"                Tile previousTile = grid.getTile(currentRow, currentColumn);\n" +
-"                for (int nextRow = currentRow - 1; nextRow >= 0; nextRow--) {\n" +
-"                    Tile tile = grid.getTile(nextRow, currentColumn);\n" +
-"                    if (tile.isOccupied()) {\n" +
-"                        if (!piece.isAlly(tile.getOccupant())) {\n" +
-"\n" +
-"                        }\n" +
-"                        break;\n" +
-"                    }\n" +
-"                }\n" +
-"                for (int nextRow = currentRow + 1; nextRow < LENGTH; nextRow++) {\n" +
-"                    Tile tile = grid.getTile(nextRow, currentColumn);\n" +
-"                    if (tile.isOccupied()) {\n" +
-"                        if (!piece.isAlly(tile.getOccupant())) {\n" +
-"\n" +
-"                        }\n" +
-"                        break;\n" +
-"                    }\n" +
-"                }\n" +
-"                for (int nextColumn = currentColumn - 1; nextColumn >= 0; nextColumn--) {\n" +
-"                    Tile tile = grid.getTile(currentRow, nextColumn);\n" +
-"                    if (tile.isOccupied()) {\n" +
-"                        if (!piece.isAlly(tile.getOccupant())) {\n" +
-"\n" +
-"                        }\n" +
-"                        break;\n" +
-"                    }\n" +
-"                }\n" +
-"                for (int nextColumn = currentColumn + 1; nextColumn < LENGTH; nextColumn++) {\n" +
-"                    Tile tile = grid.getTile(currentRow, nextColumn);\n" +
-"                    if (tile.isOccupied()) {\n" +
-"                        if (!piece.isAlly(tile.getOccupant())) {\n" +
-"\n" +
-"                        }\n" +
-"                        break;\n" +
-"                    }\n" +
-"                }\n" +
-"            }\n" +
-"\n" +
-"            for (int index = 0; index < numberOfWhiteBishops; ++index) {\n" +
-"                Bishop piece = board.whiteBishops.get(index);\n" +
-"                final int currentRow = piece.getRow();\n" +
-"                final int currentColumn = piece.getColumn();\n" +
-"                Tile previousTile = grid.getTile(currentRow, currentColumn);\n" +
-"                for (int nextRow = currentRow - 1, nextColumn = currentColumn - 1; nextRow >= 0 && nextColumn >= 0;) {\n" +
-"                    Tile tile = grid.getTile(nextRow--, nextColumn--);\n" +
-"                    if (tile.isOccupied()) {\n" +
-"                        if (!piece.isAlly(tile.getOccupant())) {\n" +
-"\n" +
-"                        }\n" +
-"                        break;\n" +
-"                    }\n" +
-"                }\n" +
-"                for (int nextRow = currentRow - 1, nextColumn = currentColumn + 1; nextRow >= 0 && nextColumn < LENGTH;) {\n" +
-"                    Tile tile = grid.getTile(nextRow--, nextColumn++);\n" +
-"                    if (tile.isOccupied()) {\n" +
-"                        if (!piece.isAlly(tile.getOccupant())) {\n" +
-"\n" +
-"                        }\n" +
-"                        break;\n" +
-"                    }\n" +
-"                }\n" +
-"                for (int nextRow = currentRow + 1, nextColumn = currentColumn - 1; nextRow < LENGTH && nextColumn >= 0;) {\n" +
-"                    Tile tile = grid.getTile(nextRow++, nextColumn--);\n" +
-"                    if (tile.isOccupied()) {\n" +
-"                        if (!piece.isAlly(tile.getOccupant())) {\n" +
-"\n" +
-"                        }\n" +
-"                        break;\n" +
-"                    }\n" +
-"                }\n" +
-"                for (int nextRow = currentRow + 1, nextColumn = currentColumn + 1; nextRow < LENGTH && nextColumn < LENGTH;) {\n" +
-"                    Tile tile = grid.getTile(nextRow++, nextColumn++);\n" +
-"                    if (tile.isOccupied()) {\n" +
-"                        if (!piece.isAlly(tile.getOccupant())) {\n" +
-"\n" +
-"                        }\n" +
-"                        break;\n" +
-"                    }\n" +
-"                }\n" +
-"            }\n" +
-"\n" +
-"            for (int index = 0; index < numberOfWhiteKnights; ++index) {\n" +
-"                Knight piece = board.whiteKnights.get(index);\n" +
-"                final int currentRow = piece.getRow();\n" +
-"                final int currentColumn = piece.getColumn();\n" +
-"\n" +
-"                final int up = currentRow - 1;\n" +
-"                final int down = currentRow + 1;\n" +
-"                final int left = currentColumn - 1;\n" +
-"                final int right = currentColumn + 1;\n" +
-"\n" +
-"                final int up2 = currentRow - 2;\n" +
-"                final int down2 = currentRow + 2;\n" +
-"                final int left2 = currentColumn - 2;\n" +
-"                final int right2 = currentColumn + 2;\n" +
-"\n" +
-"                if (up >= 0) {\n" +
-"                    if (left2 >= 0) {\n" +
-"                        Tile tile = grid.getTile(up, left2);\n" +
-"                        if (tile.isOccupied() && !piece.isAlly(tile.getOccupant())) {\n" +
-"\n" +
-"                        }\n" +
-"                    }\n" +
-"                    if (right2 < LENGTH) {\n" +
-"                        Tile tile = grid.getTile(up, right2);\n" +
-"                        if (tile.isOccupied() && !piece.isAlly(tile.getOccupant())) {\n" +
-"\n" +
-"                        }\n" +
-"                    }\n" +
-"                }\n" +
-"                if (down < LENGTH) {\n" +
-"                    if (left2 >= 0) {\n" +
-"                        Tile tile = grid.getTile(down, left2);\n" +
-"                        if (tile.isOccupied() && !piece.isAlly(tile.getOccupant())) {\n" +
-"\n" +
-"                        }\n" +
-"                    }\n" +
-"                    if (right2 < LENGTH) {\n" +
-"                        Tile tile = grid.getTile(down, right2);\n" +
-"                        if (tile.isOccupied() && !piece.isAlly(tile.getOccupant())) {\n" +
-"\n" +
-"                        }\n" +
-"                    }\n" +
-"                }\n" +
-"                if (left >= 0) {\n" +
-"                    if (up2 >= 0) {\n" +
-"                        Tile tile = grid.getTile(up2, left);\n" +
-"                        if (tile.isOccupied() && !piece.isAlly(tile.getOccupant())) {\n" +
-"\n" +
-"                        }\n" +
-"                    }\n" +
-"                    if (down2 < LENGTH) {\n" +
-"                        Tile tile = grid.getTile(down2, left);\n" +
-"                        if (tile.isOccupied() && !piece.isAlly(tile.getOccupant())) {\n" +
-"\n" +
-"                        }\n" +
-"                    }\n" +
-"                }\n" +
-"                if (right < LENGTH) {\n" +
-"                    if (up2 >= 0) {\n" +
-"                        Tile tile = grid.getTile(up2, right);\n" +
-"                        if (tile.isOccupied() && !piece.isAlly(tile.getOccupant())) {\n" +
-"\n" +
-"                        }\n" +
-"                    }\n" +
-"                    if (down2 < LENGTH) {\n" +
-"                        Tile tile = grid.getTile(down2, right);\n" +
-"                        if (tile.isOccupied() && !piece.isAlly(tile.getOccupant())) {\n" +
-"\n" +
-"                        }\n" +
-"                    }\n" +
-"                }\n" +
-"            }\n" +
-"\n" +
-"            for (int index = 0; index < numberOfWhitePawns; ++index) {\n" +
-"                Pawn piece = board.whitePawns.get(index);\n" +
-"                int nextRow = piece.getRow() - 1;\n" +
-"                if (nextRow >= 0) {\n" +
-"                    final int currentColumn = piece.getColumn();\n" +
-"                    int nextColumn = currentColumn - 1;\n" +
-"                    if (nextColumn >= 0) {\n" +
-"                        Tile tile = grid.getTile(nextRow, nextColumn);\n" +
-"                        if (tile.isOccupiedByBlack()) {\n" +
-"\n" +
-"                        }\n" +
-"                    }\n" +
-"                    if ((nextColumn = currentColumn + 1) < LENGTH) {\n" +
-"                        Tile tile = grid.getTile(nextRow, nextColumn);\n" +
-"                        if (tile.isOccupiedByBlack()) {\n" +
-"\n" +
-"                        }\n" +
-"                    }\n" +
-"                }\n" +
-"            }\n" +
-"        }\n" +
-"        {\n" +
-"            for (int index = 0; index < numberOfWhiteQueens; ++index) {\n" +
-"                Queen piece = board.whiteQueens.get(index);\n" +
-"                final int currentRow = piece.getRow();\n" +
-"                final int currentColumn = piece.getColumn();\n" +
-"                for (int nextRow = currentRow - 1; nextRow >= 0; nextRow--) {\n" +
-"                    Tile tile = grid.getTile(nextRow, currentColumn);\n" +
-"                    if (tile.isOccupied()) {\n" +
-"                        break;\n" +
-"                    }\n" +
-"\n" +
-"                }\n" +
-"                for (int nextRow = currentRow + 1; nextRow < LENGTH; nextRow++) {\n" +
-"                    Tile tile = grid.getTile(nextRow, currentColumn);\n" +
-"                    if (tile.isOccupied()) {\n" +
-"                        break;\n" +
-"                    }\n" +
-"\n" +
-"                }\n" +
-"                for (int nextColumn = currentColumn - 1; nextColumn >= 0; nextColumn--) {\n" +
-"                    Tile tile = grid.getTile(currentRow, nextColumn);\n" +
-"                    if (tile.isOccupied()) {\n" +
-"                        break;\n" +
-"                    }\n" +
-"\n" +
-"                }\n" +
-"                for (int nextColumn = currentColumn + 1; nextColumn < LENGTH; nextColumn++) {\n" +
-"                    Tile tile = grid.getTile(currentRow, nextColumn);\n" +
-"                    if (tile.isOccupied()) {\n" +
-"                        break;\n" +
-"                    }\n" +
-"\n" +
-"                }\n" +
-"                for (int nextRow = currentRow - 1, nextColumn = currentColumn - 1; nextRow >= 0 && nextColumn >= 0;) {\n" +
-"                    Tile tile = grid.getTile(nextRow--, nextColumn--);\n" +
-"                    if (tile.isOccupied()) {\n" +
-"                        break;\n" +
-"                    }\n" +
-"\n" +
-"                }\n" +
-"                for (int nextRow = currentRow - 1, nextColumn = currentColumn + 1; nextRow >= 0 && nextColumn < LENGTH;) {\n" +
-"                    Tile tile = grid.getTile(nextRow--, nextColumn++);\n" +
-"                    if (tile.isOccupied()) {\n" +
-"                        break;\n" +
-"                    }\n" +
-"\n" +
-"                }\n" +
-"                for (int nextRow = currentRow + 1, nextColumn = currentColumn - 1; nextRow < LENGTH && nextColumn >= 0;) {\n" +
-"                    Tile tile = grid.getTile(nextRow++, nextColumn--);\n" +
-"                    if (tile.isOccupied()) {\n" +
-"                        break;\n" +
-"                    }\n" +
-"\n" +
-"                }\n" +
-"                for (int nextRow = currentRow + 1, nextColumn = currentColumn + 1; nextRow < LENGTH && nextColumn < LENGTH;) {\n" +
-"                    Tile tile = grid.getTile(nextRow++, nextColumn++);\n" +
-"                    if (tile.isOccupied()) {\n" +
-"                        break;\n" +
-"                    }\n" +
-"\n" +
-"                }\n" +
-"            }\n" +
-"\n" +
-"            for (int index = 0; index < numberOfWhiteRooks; ++index) {\n" +
-"                Rook piece = board.whiteRooks.get(index);\n" +
-"                final int currentRow = piece.getRow();\n" +
-"                final int currentColumn = piece.getColumn();\n" +
-"                for (int nextRow = currentRow - 1; nextRow >= 0; nextRow--) {\n" +
-"                    Tile tile = grid.getTile(nextRow, currentColumn);\n" +
-"                    if (tile.isOccupied()) {\n" +
-"                        break;\n" +
-"                    }\n" +
-"\n" +
-"                }\n" +
-"                for (int nextRow = currentRow + 1; nextRow < LENGTH; nextRow++) {\n" +
-"                    Tile tile = grid.getTile(nextRow, currentColumn);\n" +
-"                    if (tile.isOccupied()) {\n" +
-"                        break;\n" +
-"                    }\n" +
-"\n" +
-"                }\n" +
-"                for (int nextColumn = currentColumn - 1; nextColumn >= 0; nextColumn--) {\n" +
-"                    Tile tile = grid.getTile(currentRow, nextColumn);\n" +
-"                    if (tile.isOccupied()) {\n" +
-"                        break;\n" +
-"                    }\n" +
-"\n" +
-"                }\n" +
-"                for (int nextColumn = currentColumn + 1; nextColumn < LENGTH; nextColumn++) {\n" +
-"                    Tile tile = grid.getTile(currentRow, nextColumn);\n" +
-"                    if (tile.isOccupied()) {\n" +
-"                        break;\n" +
-"                    }\n" +
-"\n" +
-"                }\n" +
-"            }\n" +
-"\n" +
-"            for (int index = 0; index < numberOfWhiteBishops; ++index) {\n" +
-"                Bishop piece = board.whiteBishops.get(index);\n" +
-"                final int currentRow = piece.getRow();\n" +
-"                final int currentColumn = piece.getColumn();\n" +
-"                for (int nextRow = currentRow - 1, nextColumn = currentColumn - 1; nextRow >= 0 && nextColumn >= 0;) {\n" +
-"                    Tile tile = grid.getTile(nextRow--, nextColumn--);\n" +
-"                    if (tile.isOccupied()) {\n" +
-"                        break;\n" +
-"                    }\n" +
-"\n" +
-"                }\n" +
-"                for (int nextRow = currentRow - 1, nextColumn = currentColumn + 1; nextRow >= 0 && nextColumn < LENGTH;) {\n" +
-"                    Tile tile = grid.getTile(nextRow--, nextColumn++);\n" +
-"                    if (tile.isOccupied()) {\n" +
-"                        break;\n" +
-"                    }\n" +
-"\n" +
-"                }\n" +
-"                for (int nextRow = currentRow + 1, nextColumn = currentColumn - 1; nextRow < LENGTH && nextColumn >= 0;) {\n" +
-"                    Tile tile = grid.getTile(nextRow++, nextColumn--);\n" +
-"                    if (tile.isOccupied()) {\n" +
-"                        break;\n" +
-"                    }\n" +
-"\n" +
-"                }\n" +
-"                for (int nextRow = currentRow + 1, nextColumn = currentColumn + 1; nextRow < LENGTH && nextColumn < LENGTH;) {\n" +
-"                    Tile tile = grid.getTile(nextRow++, nextColumn++);\n" +
-"                    if (tile.isOccupied()) {\n" +
-"                        break;\n" +
-"                    }\n" +
-"\n" +
-"                }\n" +
-"            }\n" +
-"\n" +
-"            for (int index = 0; index < numberOfWhiteKnights; ++index) {\n" +
-"                Knight piece = board.whiteKnights.get(index);\n" +
-"                final int currentRow = piece.getRow();\n" +
-"                final int currentColumn = piece.getColumn();\n" +
-"                final int up = currentRow - 1;\n" +
-"                final int down = currentRow + 1;\n" +
-"                final int left = currentColumn - 1;\n" +
-"                final int right = currentColumn + 1;\n" +
-"\n" +
-"                final int up2 = currentRow - 2;\n" +
-"                final int down2 = currentRow + 2;\n" +
-"                final int left2 = currentColumn - 2;\n" +
-"                final int right2 = currentColumn + 2;\n" +
-"\n" +
-"                if (up >= 0) {\n" +
-"                    if (left2 >= 0) {\n" +
-"                        Tile tile = grid.getTile(up, left2);\n" +
-"                        if (!tile.isOccupied()) {\n" +
-"\n" +
-"                        }\n" +
-"                    }\n" +
-"                    if (right2 < LENGTH) {\n" +
-"                        Tile tile = grid.getTile(up, right2);\n" +
-"                        if (!tile.isOccupied()) {\n" +
-"\n" +
-"                        }\n" +
-"                    }\n" +
-"                }\n" +
-"                if (down < LENGTH) {\n" +
-"                    if (left2 >= 0) {\n" +
-"                        Tile tile = grid.getTile(down, left2);\n" +
-"                        if (!tile.isOccupied()) {\n" +
-"\n" +
-"                        }\n" +
-"                    }\n" +
-"                    if (right2 < LENGTH) {\n" +
-"                        Tile tile = grid.getTile(down, right2);\n" +
-"                        if (!tile.isOccupied()) {\n" +
-"\n" +
-"                        }\n" +
-"                    }\n" +
-"                }\n" +
-"                if (left >= 0) {\n" +
-"                    if (up2 >= 0) {\n" +
-"                        Tile tile = grid.getTile(up2, left);\n" +
-"                        if (!tile.isOccupied()) {\n" +
-"\n" +
-"                        }\n" +
-"                    }\n" +
-"                    if (down2 < LENGTH) {\n" +
-"                        Tile tile = grid.getTile(down2, left);\n" +
-"                        if (!tile.isOccupied()) {\n" +
-"\n" +
-"                        }\n" +
-"                    }\n" +
-"                }\n" +
-"                if (right < LENGTH) {\n" +
-"                    if (up2 >= 0) {\n" +
-"                        Tile tile = grid.getTile(up2, right);\n" +
-"                        if (!tile.isOccupied()) {\n" +
-"\n" +
-"                        }\n" +
-"                    }\n" +
-"                    if (down2 < LENGTH) {\n" +
-"                        Tile tile = grid.getTile(down2, right);\n" +
-"                        if (!tile.isOccupied()) {\n" +
-"\n" +
-"                        }\n" +
-"                    }\n" +
-"                }\n" +
-"            }\n" +
-"\n" +
-"            for (int index = 0; index < numberOfWhitePawns; ++index) {\n" +
-"                Pawn piece = board.whitePawns.get(index);\n" +
-"                int nextRow = piece.getRow() - 1;\n" +
-"                if (!piece.hasMoved()) {\n" +
-"                    final int currentColumn = piece.getColumn();\n" +
-"                    Tile nextTileUp = grid.getTile(nextRow, currentColumn);\n" +
-"                    if (!nextTileUp.isOccupied()) {\n" +
-"                        //list.add(nextTileUp);\n" +
-"                        Tile nextNextTileUp = grid.getTile(nextRow - 1, currentColumn);\n" +
-"                        if (!nextNextTileUp.isOccupied()) {\n" +
-"                            //list.add(nextNextTileUp);\n" +
-"                        }\n" +
-"                    }\n" +
-"                    continue;\n" +
-"                }\n" +
-"                if (nextRow >= 0) {\n" +
-"                    Tile nextTileUp = grid.getTile(nextRow, piece.getColumn());\n" +
-"                    if (!nextTileUp.isOccupied()) {\n" +
-"                        //list.add(nextTileUp);\n" +
-"                    }\n" +
-"                }\n" +
-"            }\n" +
-"        }";
+        String s = "type anything here";
         s = s.replace("white", "black");
         s = s.replace("WHITE", "BLACK");
         s = s.replace("White", "Black");
         System.out.println(s);
-        /*
-        Piece piece = new King(0, 0, false);
-        int c = 1;
-        while (1 == c) {
-            long s = System.nanoTime();
-            boolean method = piece.isKing();
-            System.out.println(System.nanoTime() - s);
-            s = System.nanoTime();
-            boolean type = piece.getClass() == King.class;
-            System.out.println(System.nanoTime() - s);
-            
-            System.out.println();
-        }
-         */
-        System.out.println(Constants.RUNTIME.availableProcessors());
-        testStartPosition();
-        testErrorPosition();
+        
+        System.out.println("Num processors: " + Constants.RUNTIME.availableProcessors());
+        System.out.println();
+        
         int k = 0;
         while (k++ < 10) {
-            int[] nums = new int[10000000];
-            int[] nums2 = new int[10000000];
+            int[] first = new int[10000000];
+            int[] second = new int[10000000];
             long start = System.nanoTime();
-            for (int index = 0; index < nums.length; ++index) {
-                nums[index] = index << 3;
+            for (int index = 0; index < first.length; ++index) {
+                first[index] = index << 3;
             }
-            System.out.println(System.nanoTime() - start);
+            long timeTaken = System.nanoTime() - start;
+            System.out.println("Speed of bitshift: " + timeTaken);
             start = System.nanoTime();
-            for (int index = 0; index < nums2.length; ++index) {
-                nums2[index] = index * ChessConstants.LENGTH;
+            for (int index = 0; index < second.length; ++index) {
+                second[index] = index * ChessConstants.LENGTH;
             }
-            System.out.println(System.nanoTime() - start);
+            timeTaken = System.nanoTime() - start;
+            System.out.println("Speed of multiply: " + timeTaken);
             System.out.println();
         }
+        
+        testStartPosition();
+        testErrorPosition();
     }
 
     private static void testStartPosition() {
@@ -688,18 +200,21 @@ final class Tester {
         }
     }
     
+    //checks to see if evaluator & evaluator special agree
     static void value(Grid grid) {
-        System.out.println("Comparing Evaluator with EvaluatorSpecial");
         List<Piece> pieces = grid.getPieces();
         Pieces.sort(pieces);
         List<Piece> whites = Pieces.getWhite(pieces);
         List<Piece> blacks = Pieces.getBlack(pieces);
-        System.out.println(Evaluator.evaluateInBlackPerspective(grid, whites, blacks));
+        int normal = Evaluator.evaluateInBlackPerspective(grid, whites, blacks);
         Board board = new Board(grid);
-        System.out.println(EvaluatorSpecial.evaluateInBlackPerspective(board));
+        int special = EvaluatorSpecial.evaluateInBlackPerspective(board);
+        if (normal != special) {
+            throw new Error();
+        }
     }
 
-    static final void testPosition(final List<Piece> pieces, final boolean color) {
+    private static void testPosition(final List<Piece> pieces, final boolean color) {
         final Grid grid = new Grid();
         final int numberOfPieces = pieces.size();
 
@@ -709,7 +224,6 @@ final class Tester {
             grid.getTile(piece.getRow(), piece.getColumn()).setOccupant(piece);
         }
         
-
         //for each piece, test their protected tiles
         for (int pieceIndex = 0; pieceIndex != numberOfPieces; ++pieceIndex) {
             final Piece piece = pieces.get(pieceIndex);
@@ -743,8 +257,48 @@ final class Tester {
             System.out.println("Perft (" + depth + "): " + perft(grid, depth, color));
         }
         check(grid, copiedGrid, pieces, copiedPieces);
-        //System.out.println("Board Evaluation: " + Evaluator.analyze(grid, pieces));
         System.out.println();
+    }
+    
+    //checks to make sure all piece protection methods are working properly
+    static final void checkProtections(final List<Piece> pieces, final boolean color) {
+        final List<Piece> clonedPieces = Pieces.getDeepCopy(pieces);
+        final Grid grid = new Grid();
+        final int numberOfPieces = pieces.size();
+
+        //put pieces onto the grid
+        for (int index = 0; index != numberOfPieces; ++index) {
+            Piece piece = pieces.get(index);
+            grid.getTile(piece.getRow(), piece.getColumn()).setOccupant(piece);
+        }
+        
+        //for each piece, test their protected tiles
+        for (int pieceIndex = 0; pieceIndex != numberOfPieces; ++pieceIndex) {
+            final Piece piece = pieces.get(pieceIndex);
+            final List<Tile> protectedTiles = piece.getProtectedTiles(grid);
+            final int numberOfProtectedTiles = piece.getNumberOfProtectedTiles(grid);
+            piece.setProtectedTiles(grid);
+            final List<Tile> protectedTilesOnGrid = new ArrayList<>(numberOfProtectedTiles);
+            for (int index = 0; index < LINEAR_LENGTH; ++index) {
+                Tile tile = grid.getTile(index);
+                if (tile.protectedByAlly(piece)) {
+                    protectedTilesOnGrid.add(tile);
+                }
+            }
+            if (protectedTiles.size() != numberOfProtectedTiles) {
+                throw new Error();
+            }
+            protectedTiles.sort(TILE_SORTER);
+            protectedTilesOnGrid.sort(TILE_SORTER);
+            if (!protectedTiles.equals(protectedTilesOnGrid)) {
+                throw new Error();
+            }
+            for (int index = 0; index < LINEAR_LENGTH; ++index) {
+                grid.getTile(index).removeProtections();
+            }
+        }
+        grid.setProtections(pieces);
+        check(grid, new Grid(grid), pieces, clonedPieces);
     }
 
     static List<Pawn> checkEnPassant(final Grid grid, final List<Piece> pieces) {
@@ -764,8 +318,8 @@ final class Tester {
     }
 
     static void uncheckEnPassant(final List<Pawn> pawns) {
-        for (Pawn pawn : pawns) {
-            pawn.setEnPassantPermission(true);
+        for (Iterator<Pawn> it = pawns.iterator(); it.hasNext();) {
+            it.next().setEnPassantPermission(true);
         }
     }
 

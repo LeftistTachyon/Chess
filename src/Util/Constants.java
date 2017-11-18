@@ -204,7 +204,9 @@ public final class Constants {
         if (list.isEmpty()) {
             throw new IllegalArgumentException("Could not generate a suitable font.");
         }
-        return list.getLast();
+        Font font = list.getLast();
+        list.clear();
+        return font;
     }
 
     public static int max(int a, int b) {
