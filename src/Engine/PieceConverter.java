@@ -1,7 +1,7 @@
 package Engine;
 
 import Util.ChessConstants;
-import Util.Constants;
+import static Util.Constants.SPACE;
 import Util.Converter;
 
 /**
@@ -22,10 +22,12 @@ public final class PieceConverter extends Converter<String, Piece> {
             throw new NullPointerException();
         }
         try {
-            String[] read = str.split(Constants.SPACE);
+            String[] read = str.split(SPACE);
             switch (read[4]) {
                 case ChessConstants.PAWN: {
-                    return new Pawn(Integer.parseInt(read[0]), Integer.parseInt(read[1]), Integer.parseInt(read[2]), Boolean.parseBoolean(read[3]));
+                    Pawn pawn = new Pawn(Integer.parseInt(read[0]), Integer.parseInt(read[1]), Integer.parseInt(read[2]), Boolean.parseBoolean(read[3]));
+                    pawn.setJustMadeDoubleJump(Boolean.parseBoolean(read[5]));
+                    return pawn;
                 }
                 case ChessConstants.KNIGHT: {
                     return new Knight(Integer.parseInt(read[0]), Integer.parseInt(read[1]), Integer.parseInt(read[2]), Boolean.parseBoolean(read[3]));
@@ -55,6 +57,10 @@ public final class PieceConverter extends Converter<String, Piece> {
         if (piece == null) {
             throw new NullPointerException();
         }
-        return piece.getRow() + Constants.SPACE + piece.getColumn() + Constants.SPACE + piece.getMoveCount() + Constants.SPACE + piece.isWhite() + Constants.SPACE + piece.getType();
+        String result = piece.getRow() + SPACE + piece.getColumn() + SPACE + piece.getMoveCount() + SPACE + piece.isWhite() + SPACE + piece.getType();
+        if (piece.isPawn()) {
+            return result + SPACE + piece.justMadeDoubleJump();
+        }
+        return result;
     }
 }

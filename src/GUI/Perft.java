@@ -1,25 +1,12 @@
-package Engine;
+package GUI;
 
 import Util.ChessConstants;
-import static Util.ChessConstants.LINEAR_LENGTH;
-import Util.Constants;
-import static Util.Constants.NEGATIVE_INFINITY;
-import static Util.Constants.POSITIVE_INFINITY;
-import java.util.ArrayList;
-import java.util.Comparator;
+import static Util.ChessConstants.QUEEN;
 import java.util.List;
 
-final class Tester {
+public final class Perft {
 
-    @SuppressWarnings("Convert2Lambda")
-    private static final Comparator<Tile> TILE_SORTER = new Comparator<Tile>() {
-        @Override
-        public int compare(Tile first, Tile next) {
-            return Integer.compare(first.getIndex(), next.getIndex());
-        }
-    };
-
-    private Tester() {
+    private Perft() {
 
     }
 
@@ -27,283 +14,13 @@ final class Tester {
         grid1.equals(grid2);
         comparePieces(list1, list2);
     }
-    
+
     private static void comparePieces(List<Piece> list1, List<Piece> list2) {
         if (!list1.equals(list2)) {
             throw new Error();
         }
     }
 
-    public static final void main(String... args) {
-        String s = "type anything here";
-        s = s.replace("white", "black");
-        s = s.replace("WHITE", "BLACK");
-        s = s.replace("White", "Black");
-        System.out.println(s);
-        
-        System.out.println("Num processors: " + Constants.RUNTIME.availableProcessors());
-        System.out.println();
-        
-        int k = 0;
-        while (k++ < 10) {
-            int[] first = new int[10000000];
-            int[] second = new int[10000000];
-            long start = System.nanoTime();
-            for (int index = 0; index < first.length; ++index) {
-                first[index] = index << 3;
-            }
-            long timeTaken = System.nanoTime() - start;
-            System.out.println("Speed of bitshift: " + timeTaken);
-            start = System.nanoTime();
-            for (int index = 0; index < second.length; ++index) {
-                second[index] = index * ChessConstants.LENGTH;
-            }
-            timeTaken = System.nanoTime() - start;
-            System.out.println("Speed of multiply: " + timeTaken);
-            System.out.println();
-        }
-        
-        testStartPosition();
-        testErrorPosition();
-    }
-
-    private static void testStartPosition() {
-        System.out.println("Testing Starting Position");
-        AI.TIMER = new SearchTimer(10000, "Test");
-        new AI(true, 60).useTestDialog();
-        List<Piece> pieces = new ArrayList<>();
-
-        pieces.add(new King(7, 4, true));
-        pieces.add(new King(0, 4, false));
-
-        pieces.add(new Rook(7, 0, true));
-        pieces.add(new Knight(7, 1, true));
-        pieces.add(new Bishop(7, 2, true));
-        pieces.add(new Queen(7, 3, true));
-        pieces.add(new Bishop(7, 5, true));
-        pieces.add(new Knight(7, 6, true));
-        pieces.add(new Rook(7, 7, true));
-
-        pieces.add(new Pawn(6, 0, true));
-        pieces.add(new Pawn(6, 1, true));
-        pieces.add(new Pawn(6, 2, true));
-        pieces.add(new Pawn(6, 3, true));
-        pieces.add(new Pawn(6, 4, true));
-        pieces.add(new Pawn(6, 5, true));
-        pieces.add(new Pawn(6, 6, true));
-        pieces.add(new Pawn(6, 7, true));
-
-        pieces.add(new Rook(0, 0, false));
-        pieces.add(new Knight(0, 1, false));
-        pieces.add(new Bishop(0, 2, false));
-        pieces.add(new Queen(0, 3, false));
-        pieces.add(new Bishop(0, 5, false));
-        pieces.add(new Knight(0, 6, false));
-        pieces.add(new Rook(0, 7, false));
-
-        pieces.add(new Pawn(1, 0, false));
-        pieces.add(new Pawn(1, 1, false));
-        pieces.add(new Pawn(1, 2, false));
-        pieces.add(new Pawn(1, 3, false));
-        pieces.add(new Pawn(1, 4, false));
-        pieces.add(new Pawn(1, 5, false));
-        pieces.add(new Pawn(1, 6, false));
-        pieces.add(new Pawn(1, 7, false));
-
-        //Pieces.sort(pieces);
-        testPosition(pieces, false);
-        Pieces.sort(pieces);
-        Grid grid = new Grid();
-        for (int index = 0, size = pieces.size(); index != size; ++index) {
-            Piece piece = pieces.get(index);
-            grid.getTile(piece.getRow(), piece.getColumn()).setOccupant(piece);
-        }
-        grid.setProtections(pieces);
-        List<Piece> whites = Pieces.getWhite(pieces);
-        List<Piece> blacks = Pieces.getBlack(pieces);
-        for (int depth = 1; depth <= 5; ++depth) {
-            int alphaBetaScore = AlphaBetaWhite.min(grid, whites, blacks, depth, NEGATIVE_INFINITY, POSITIVE_INFINITY);
-            int alphaBetaPositionCount = Evaluator.getNumberOfPositionsEvaluatedInWhitePersepective();
-            System.out.println("AlphaBeta Score: " + alphaBetaScore);
-            System.out.println("AlphaBeta Position Count: " + alphaBetaPositionCount);
-            Evaluator.setNumberOfPositionEvaluatedInWhitePersepective(0);
-            int minMaxScore = MinMaxWhite.min(grid, whites, blacks, depth);
-            int minMaxPositionCount = Evaluator.getNumberOfPositionsEvaluatedInWhitePersepective();
-            Evaluator.setNumberOfPositionEvaluatedInWhitePersepective(0);
-            System.out.println("MinMax Score: " + minMaxScore);
-            System.out.println("MinMax Position Count: " + minMaxPositionCount);
-            System.out.println();
-        }
-    }
-
-    private static void testErrorPosition() {
-        System.out.println("Testing Error Position");
-        List<Piece> pieces = new ArrayList<>();
-
-        pieces.add(new Rook(0, 0, false));
-        pieces.add(new Bishop(0, 2, false));
-        pieces.add(new Queen(0, 3, false));
-        pieces.add(new King(0, 4, false));
-        pieces.add(new Bishop(0, 5, false));
-        pieces.add(new Knight(0, 6, false));
-        pieces.add(new Rook(0, 7, false));
-        pieces.add(new Pawn(1, 0, false));
-        pieces.add(new Pawn(1, 1, false));
-        pieces.add(new Pawn(1, 2, false));
-        pieces.add(new Pawn(1, 3, false));
-        pieces.add(new Pawn(1, 5, false));
-        pieces.add(new Pawn(1, 6, false));
-        pieces.add(new Pawn(1, 7, false));
-        pieces.add(new Knight(2, 2, false));
-        pieces.add(new Pawn(3, 4, false));
-        pieces.add(new Pawn(4, 4, true));
-        pieces.add(new Pawn(5, 3, true));
-        pieces.add(new Pawn(6, 0, true));
-        pieces.add(new Pawn(6, 1, true));
-        pieces.add(new Pawn(6, 2, true));
-        pieces.add(new King(6, 4, true));
-        pieces.add(new Pawn(6, 5, true));
-        pieces.add(new Pawn(6, 6, true));
-        pieces.add(new Pawn(6, 7, true));
-        pieces.add(new Rook(7, 0, true));
-        pieces.add(new Knight(7, 1, true));
-        pieces.add(new Bishop(7, 2, true));
-        pieces.add(new Queen(7, 3, true));
-        pieces.add(new Knight(7, 6, true));
-        pieces.add(new Rook(7, 7, true));
-
-        testPosition(pieces, false);
-        Pieces.sort(pieces);
-        Grid grid = new Grid();
-        for (int index = 0, size = pieces.size(); index != size; ++index) {
-            Piece piece = pieces.get(index);
-            grid.getTile(piece.getRow(), piece.getColumn()).setOccupant(piece);
-        }
-        grid.setProtections(pieces);
-        List<Piece> whites = Pieces.getWhite(pieces);
-        List<Piece> blacks = Pieces.getBlack(pieces);
-        for (int depth = 1; depth <= 7; ++depth) {
-            int alphaBetaScore = AlphaBetaWhite.min(grid, whites, blacks, depth, NEGATIVE_INFINITY, POSITIVE_INFINITY);
-            int alphaBetaPositionCount = Evaluator.getNumberOfPositionsEvaluatedInWhitePersepective();
-            System.out.println("AlphaBeta Score: " + alphaBetaScore);
-            System.out.println("AlphaBeta Position Count: " + alphaBetaPositionCount);
-            Evaluator.setNumberOfPositionEvaluatedInWhitePersepective(0);
-            /*
-            int minMaxScore = MinMaxWhite.min(grid, whites, blacks, depth);
-            int minMaxPositionCount = Evaluator.getNumberOfPositionsEvaluatedInWhitePersepective();
-            Evaluator.setNumberOfPositionEvaluatedInWhitePersepective(0);
-            System.out.println("MinMax Score: " + minMaxScore);
-            System.out.println("MinMax Position Count: " + minMaxPositionCount);
-             */
-            System.out.println();
-        }
-    }
-    
-    //checks to see if evaluator & evaluator special agree
-    static void value(Grid grid) {
-        List<Piece> pieces = grid.getPieces();
-        Pieces.sort(pieces);
-        List<Piece> whites = Pieces.getWhite(pieces);
-        List<Piece> blacks = Pieces.getBlack(pieces);
-        int normal = Evaluator.evaluateInBlackPerspective(grid, whites, blacks);
-        Board board = new Board(grid);
-        int special = EvaluatorSpecial.evaluateInBlackPerspective(board);
-        if (normal != special) {
-            throw new Error();
-        }
-    }
-
-    private static void testPosition(final List<Piece> pieces, final boolean color) {
-        final Grid grid = new Grid();
-        final int numberOfPieces = pieces.size();
-
-        //put pieces onto the grid
-        for (int index = 0; index != numberOfPieces; ++index) {
-            Piece piece = pieces.get(index);
-            grid.getTile(piece.getRow(), piece.getColumn()).setOccupant(piece);
-        }
-        
-        //for each piece, test their protected tiles
-        for (int pieceIndex = 0; pieceIndex != numberOfPieces; ++pieceIndex) {
-            final Piece piece = pieces.get(pieceIndex);
-            final List<Tile> protectedTiles = piece.getProtectedTiles(grid);
-            final int numberOfProtectedTiles = piece.getNumberOfProtectedTiles(grid);
-            piece.setProtectedTiles(grid);
-            final List<Tile> protectedTilesOnGrid = new ArrayList<>(numberOfProtectedTiles);
-            for (int index = 0; index < LINEAR_LENGTH; ++index) {
-                Tile tile = grid.getTile(index);
-                if (tile.protectedByAlly(piece)) {
-                    protectedTilesOnGrid.add(tile);
-                }
-            }
-            if (protectedTiles.size() != numberOfProtectedTiles) {
-                throw new Error();
-            }
-            protectedTiles.sort(TILE_SORTER);
-            protectedTilesOnGrid.sort(TILE_SORTER);
-            if (!protectedTiles.equals(protectedTilesOnGrid)) {
-                throw new Error();
-            }
-            for (int index = 0; index < LINEAR_LENGTH; ++index) {
-                grid.getTile(index).removeProtections();
-            }
-        }
-        grid.setProtections(pieces);
-        
-        Grid copiedGrid = new Grid(grid);
-        List<Piece> copiedPieces = Pieces.getDeepCopy(pieces);
-        for (int depth = 1; depth <= 7; ++depth) {
-            System.out.println("Perft (" + depth + "): " + perft(grid, depth, color));
-        }
-        check(grid, copiedGrid, pieces, copiedPieces);
-        System.out.println();
-    }
-    
-    //checks to make sure all piece protection methods are working properly
-    static final void checkProtections(final List<Piece> pieces, final boolean color) {
-        final List<Piece> clonedPieces = Pieces.getDeepCopy(pieces);
-        final Grid grid = new Grid();
-        final int numberOfPieces = pieces.size();
-
-        //put pieces onto the grid
-        for (int index = 0; index != numberOfPieces; ++index) {
-            Piece piece = pieces.get(index);
-            grid.getTile(piece.getRow(), piece.getColumn()).setOccupant(piece);
-        }
-        
-        //for each piece, test their protected tiles
-        for (int pieceIndex = 0; pieceIndex != numberOfPieces; ++pieceIndex) {
-            final Piece piece = pieces.get(pieceIndex);
-            final List<Tile> protectedTiles = piece.getProtectedTiles(grid);
-            final int numberOfProtectedTiles = piece.getNumberOfProtectedTiles(grid);
-            piece.setProtectedTiles(grid);
-            final List<Tile> protectedTilesOnGrid = new ArrayList<>(numberOfProtectedTiles);
-            for (int index = 0; index < LINEAR_LENGTH; ++index) {
-                Tile tile = grid.getTile(index);
-                if (tile.protectedByAlly(piece)) {
-                    protectedTilesOnGrid.add(tile);
-                }
-            }
-            if (protectedTiles.size() != numberOfProtectedTiles) {
-                throw new Error();
-            }
-            protectedTiles.sort(TILE_SORTER);
-            protectedTilesOnGrid.sort(TILE_SORTER);
-            if (!protectedTiles.equals(protectedTilesOnGrid)) {
-                throw new Error();
-            }
-            for (int index = 0; index < LINEAR_LENGTH; ++index) {
-                grid.getTile(index).removeProtections();
-            }
-        }
-        grid.setProtections(pieces);
-        check(grid, new Grid(grid), pieces, clonedPieces);
-    }
-    
-    //after a player makes a turn that does
-    //not capture the enemy pawn that moved up 2 tiles
-    //that enemy pawn is now immune from enpassant 
-    
     /**
      * Method that should be called immediately after White successfully
      * finishes his/her turn. If a Black Pawn made a double jump just 
@@ -347,8 +64,7 @@ final class Tester {
         }
         return null;
     }
-
-    //improved perft function  
+    
     /**
      * Counts the number of all possible positions from a given 
      * start position.
@@ -361,13 +77,13 @@ final class Tester {
      * possible positions starting from White's turn of the given position. 
      * @return 
      */
-    static final long perft(final Grid grid, int depth, final boolean color) {
+    static final int perft(final Grid grid, int depth, final boolean color) {
         if (depth == 0) {
             return 1;
         }
 
         --depth;
-        long moves = 0;
+        int moves = 0;
 
         final List<Piece> pieces = grid.getPieces();
         Pieces.sort(pieces);
@@ -441,7 +157,7 @@ final class Tester {
                         rightRookCastleTile.removeOccupant();
                         grid.setProtections(pieces);
                     }
-                    Tester.check(grid, clonedGrid, pieces, clonedPieces);
+                    Perft.check(grid, clonedGrid, pieces, clonedPieces);
                 }
             }
 
@@ -460,7 +176,7 @@ final class Tester {
                     }
                     previousTile.removeOccupant();
                     if (black.isPawn() && previousRow == 6) {
-                        Queen replace = Pawn.promote(black);
+                        Piece replace = ((Pawn) black).promote(QUEEN);
                         attackTile.setOccupant(replace);
                         int pawnIndex = pieces.indexOf(black);
                         pieces.set(pawnIndex, replace);
@@ -498,7 +214,7 @@ final class Tester {
                         pieces.add(removeIndex, enemy);
                         grid.setProtections(pieces);
                     }
-                    Tester.check(grid, clonedGrid, pieces, clonedPieces);
+                    Perft.check(grid, clonedGrid, pieces, clonedPieces);
                 }
                 if (black.isPawn()) {
                     {
@@ -553,7 +269,7 @@ final class Tester {
                             grid.setProtections(pieces);
                         }
                     }
-                    Tester.check(grid, clonedGrid, pieces, clonedPieces);
+                    Perft.check(grid, clonedGrid, pieces, clonedPieces);
                 }
             }
 
@@ -567,7 +283,7 @@ final class Tester {
                     Tile moveTile = moveTiles.get(index);
                     previousTile.removeOccupant();
                     if (black.isPawn() && previousRow == 6) {
-                        Queen replace = Pawn.promote(black);
+                        Piece replace = ((Pawn) black).promote(QUEEN);
                         moveTile.setOccupant(replace);
                         int pawnIndex = pieces.indexOf(black);
                         pieces.set(pawnIndex, replace);
@@ -612,10 +328,10 @@ final class Tester {
                         moveTile.removeOccupant();
                         grid.setProtections(pieces);
                     }
-                    Tester.check(grid, clonedGrid, pieces, clonedPieces);
+                    Perft.check(grid, clonedGrid, pieces, clonedPieces);
                 }
             }
-            Tester.check(grid, clonedGrid, pieces, clonedPieces);
+            Perft.check(grid, clonedGrid, pieces, clonedPieces);
             return moves;
         }
         else {
@@ -682,7 +398,7 @@ final class Tester {
                         rightRookCastleTile.removeOccupant();
                         grid.setProtections(pieces);
                     }
-                    Tester.check(grid, clonedGrid, pieces, clonedPieces);
+                    Perft.check(grid, clonedGrid, pieces, clonedPieces);
                 }
             }
 
@@ -701,7 +417,7 @@ final class Tester {
                     }
                     previousTile.removeOccupant();
                     if (white.isPawn() && previousRow == 1) {
-                        Queen replace = Pawn.promote(white);
+                        Piece replace = ((Pawn) white).promote(QUEEN);
                         attackTile.setOccupant(replace);
                         int pawnIndex = pieces.indexOf(white);
                         pieces.set(pawnIndex, replace);
@@ -739,7 +455,7 @@ final class Tester {
                         pieces.add(removeIndex, enemy);
                         grid.setProtections(pieces);
                     }
-                    Tester.check(grid, clonedGrid, pieces, clonedPieces);
+                    Perft.check(grid, clonedGrid, pieces, clonedPieces);
                 }
                 if (white.isPawn()) {
                     {
@@ -807,7 +523,7 @@ final class Tester {
                     Tile moveTile = moveTiles.get(index);
                     previousTile.removeOccupant();
                     if (white.isPawn() && previousRow == 1) {
-                        Queen replace = Pawn.promote(white);
+                        Piece replace = ((Pawn) white).promote(QUEEN);
                         moveTile.setOccupant(replace);
                         int pawnIndex = pieces.indexOf(white);
                         pieces.set(pawnIndex, replace);
@@ -850,10 +566,10 @@ final class Tester {
                         moveTile.removeOccupant();
                         grid.setProtections(pieces);
                     }
-                    Tester.check(grid, clonedGrid, pieces, clonedPieces);
+                    Perft.check(grid, clonedGrid, pieces, clonedPieces);
                 }
             }
-            Tester.check(grid, clonedGrid, pieces, clonedPieces);
+            Perft.check(grid, clonedGrid, pieces, clonedPieces);
             return moves;
         }
     }

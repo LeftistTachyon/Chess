@@ -1,7 +1,10 @@
 package Engine;
 
 import Util.ChessConstants;
+import static Util.ChessConstants.BLACK;
+import static Util.ChessConstants.WHITE;
 import Util.Constants;
+import static Util.Constants.SPACE;
 import java.util.List;
 
 @SuppressWarnings("EqualsAndHashcode")
@@ -198,7 +201,7 @@ public abstract class Piece implements Cloneable, Comparable<Piece>, Locatable {
      * @return The full name of this piece.
      */
     public final String getName() {
-        return (color) ? ChessConstants.WHITE + Constants.SPACE + getType() : ChessConstants.BLACK + Constants.SPACE + getType();
+        return (color) ? WHITE + SPACE + getType() : BLACK + SPACE + getType();
     }
 
     /**
@@ -221,11 +224,41 @@ public abstract class Piece implements Cloneable, Comparable<Piece>, Locatable {
      * @return 
      */
     public abstract List<Tile> getProtectedTiles(Grid grid);
-    
+
     public abstract void setProtectedTiles(Grid grid);
-    
+
     public abstract int getNumberOfProtectedTiles(Grid grid);
+
+    //method which only applies to Pawn, defined here
+    //to avoid the need for casting
+    public boolean justMadeDoubleJump() {
+        throw new UnsupportedOperationException();
+    }
+
+    //method which only applies to Pawn, defined here
+    //to avoid the need for casting
+    public void setJustMadeDoubleJump(boolean doubleJumpJustPerformed) {
+        throw new UnsupportedOperationException();
+    }
     
+    //method which only applies to Pawn, defined here
+    //to avoid the need for casting
+    public Tile getLeftEnPassantTile(Grid grid) {
+        throw new UnsupportedOperationException();
+    }
+    
+    //method which only applies to Pawn, defined here
+    //to avoid the need for casting
+    public Tile getRightEnPassantTile(Grid grid) {
+        throw new UnsupportedOperationException();
+    }
+    
+    //method which only applies to Pawn, defined here
+    //to avoid the need for casting
+    public List<Tile> getEnPassantTiles(Grid grid) {
+        throw new UnsupportedOperationException();
+    }
+
     /**
      * Determines whether of not this piece is a {@link Pawn}.
      * @return {@code true} if this piece is a pawn.
@@ -283,7 +316,7 @@ public abstract class Piece implements Cloneable, Comparable<Piece>, Locatable {
      * repetition.
      * @return 
      */
-    public final String encode() {
+    public String encode() {
         return "(" + color + "," + getType() + "," + row + "," + column + ")";
     }
     

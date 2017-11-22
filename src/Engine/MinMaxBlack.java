@@ -7,6 +7,7 @@ import static Util.Constants.NEGATIVE_INFINITY;
 import java.util.List;
 
 /**
+ * TO DO ADD CHECKING HERE
  * Min-Max search function that searches through
  * the chess game tree in Black's perspective.
  * Larger values indicate better positions for Black and vice versa.

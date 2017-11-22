@@ -1,7 +1,7 @@
 package Engine;
 
 import Util.ChessConstants;
-import Util.Constants;
+import static Util.Constants.SPACE;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -161,6 +161,50 @@ final class Pieces {
         }
         return null;
     }
+    
+    /**
+     * Method that should be called immediately after White successfully
+     * finishes his/her turn. If a Black Pawn made a double jump just 
+     * before White's last turn, and has not been captured En Passant,
+     * it is now permanently immune from 
+     * being targeted by En Passant. 
+     * 
+     * @see checkBlackEnPassantRights()
+     */
+    public static Piece checkWhiteEnPassantRights(List<Piece> pieces) {
+        for (int index = 0, size = pieces.size(); index != size; ++index) {
+            Piece piece = pieces.get(index);
+            if (piece.isPawn() && piece.isBlack()) {
+                if (piece.justMadeDoubleJump()) {
+                    piece.setJustMadeDoubleJump(false);
+                    return piece;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Method that should be called immediately after Black successfully
+     * finishes his/her turn. If a White Pawn made a double jump just 
+     * before Black's last turn, and has not been captured
+     * En Passant, it is now permanently immune from 
+     * being targeted by En Passant. 
+     * 
+     * @see checkWhiteEnPassantRights()
+     */
+    public static Piece checkBlackEnPassantRights(List<Piece> pieces) {
+        for (int index = 0, size = pieces.size(); index != size; ++index) {
+            Piece piece = pieces.get(index);
+            if (piece.isPawn() && piece.isWhite()) {
+                if (piece.justMadeDoubleJump()) {
+                    piece.setJustMadeDoubleJump(false);
+                    return piece;
+                }
+            }
+        }
+        return null;
+    }
 
     private static final StringBuilder ENCODER = new StringBuilder(100);
 
@@ -170,7 +214,7 @@ final class Pieces {
         for (Iterator<Piece> it = pieces.iterator(); it.hasNext();) {
             ENCODER.append(it.next().encode());
             if (it.hasNext()) {
-                ENCODER.append(Constants.SPACE);
+                ENCODER.append(SPACE);
             }
             else {
                 break;
@@ -182,12 +226,12 @@ final class Pieces {
     static String encode(List<Piece> whites, List<Piece> blacks) {
         ENCODER.setLength(0);
         for (int index = 0, size = whites.size(); index != size; ++index) {
-            ENCODER.append(whites.get(index).encode()).append(Constants.SPACE);
+            ENCODER.append(whites.get(index).encode()).append(SPACE);
         }
         for (Iterator<Piece> it = blacks.iterator(); it.hasNext();) {
             ENCODER.append(it.next().encode());
             if (it.hasNext()) {
-                ENCODER.append(Constants.SPACE);
+                ENCODER.append(SPACE);
             }
             else {
                 break;

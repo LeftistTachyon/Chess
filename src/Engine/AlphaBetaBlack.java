@@ -15,6 +15,8 @@ import java.util.List;
  * @see Evaluator
  */
 final class AlphaBetaBlack {
+    
+    private static boolean SECURE_MODE = true;
 
     private AlphaBetaBlack() {
 
@@ -37,6 +39,8 @@ final class AlphaBetaBlack {
         if (depth == 0 || AI.TIMER.timeOver()) {
             return Evaluator.evaluateInBlackPerspective(grid, whites, blacks);
         }
+
+        Grid clonedGrid = SECURE_MODE ? new Grid(grid) : grid;
 
         --depth;
         int value = POSITIVE_INFINITY;
@@ -76,6 +80,8 @@ final class AlphaBetaBlack {
                     kingCastleTile.removeOccupant();
                     leftRookCastleTile.removeOccupant();
                     grid.setProtections(whites, blacks);
+                    
+                    clonedGrid.equals(grid);
 
                     if (beta <= alpha) {
                         return beta;
@@ -109,6 +115,8 @@ final class AlphaBetaBlack {
                     kingCastleTile.removeOccupant();
                     rightRookCastleTile.removeOccupant();
                     grid.setProtections(whites, blacks);
+                    
+                    clonedGrid.equals(grid);
 
                     if (beta <= alpha) {
                         return beta;
@@ -131,14 +139,12 @@ final class AlphaBetaBlack {
                 if (enemy.isKing()) {
                     continue;
                 }
-                previousTile.removeOccupant();
                 if (white.isPawn() && previousRow == 1) {
                     Queen replace = Pawn.promote(white);
-                    attackTile.setOccupant(replace);
+                    previousTile.setOccupant(replace);
                     int pawnIndex = whites.indexOf(white);
                     whites.set(pawnIndex, replace);
-                    int removeIndex = Pieces.remove(blacks, enemy);
-                    grid.setProtections(whites, blacks);
+                    int removeIndex = MoveUtils.doWhiteCapture(grid, whites, blacks, attackTile, previousTile);
                     if (!whiteKing.inCheck(grid)) {
                         replace.increaseMoveCount();
                         int result = max(grid, whites, blacks, depth, alpha, beta);
@@ -149,24 +155,16 @@ final class AlphaBetaBlack {
                             beta = value;
                         }
                         if (beta <= alpha) {
-                            previousTile.setOccupant(white);
-                            attackTile.setOccupant(enemy);
-                            whites.set(pawnIndex, white);
-                            blacks.add(removeIndex, enemy);
-                            grid.setProtections(whites, blacks);
+                            MoveUtils.undoWhiteCapturePromotion(grid, whites, blacks, white, pawnIndex, enemy, removeIndex, attackTile, previousTile);
+                            clonedGrid.equals(grid);
                             return beta;
                         }
                     }
-                    previousTile.setOccupant(white);
-                    attackTile.setOccupant(enemy);
-                    whites.set(pawnIndex, white);
-                    blacks.add(removeIndex, enemy);
-                    grid.setProtections(whites, blacks);
+                    MoveUtils.undoWhiteCapturePromotion(grid, whites, blacks, white, pawnIndex, enemy, removeIndex, attackTile, previousTile);
+                    clonedGrid.equals(grid);
                 }
                 else {
-                    attackTile.setOccupant(white);
-                    int removeIndex = Pieces.remove(blacks, enemy);
-                    grid.setProtections(whites, blacks);
+                    int removeIndex = MoveUtils.doWhiteCapture(grid, whites, blacks, attackTile, previousTile);
                     if (!whiteKing.inCheck(grid)) {
                         white.increaseMoveCount();
                         int result = max(grid, whites, blacks, depth, alpha, beta);
@@ -178,17 +176,13 @@ final class AlphaBetaBlack {
                         }
                         white.decreaseMoveCount();
                         if (beta <= alpha) {
-                            previousTile.setOccupant(white);
-                            attackTile.setOccupant(enemy);
-                            blacks.add(removeIndex, enemy);
-                            grid.setProtections(whites, blacks);
+                            MoveUtils.undoWhiteCapture(grid, whites, blacks, enemy, removeIndex, attackTile, previousTile);
+                            clonedGrid.equals(grid);
                             return beta;
                         }
                     }
-                    previousTile.setOccupant(white);
-                    attackTile.setOccupant(enemy);
-                    blacks.add(removeIndex, enemy);
-                    grid.setProtections(whites, blacks);
+                    MoveUtils.undoWhiteCapture(grid, whites, blacks, enemy, removeIndex, attackTile, previousTile);
+                    clonedGrid.equals(grid);
                 }
             }
             /*
@@ -264,7 +258,7 @@ final class AlphaBetaBlack {
                     }
                 }
             }
-            */
+             */
         }
 
         for (int pieceIndex = 0; pieceIndex != numberOfWhitePieces; ++pieceIndex) {
@@ -275,13 +269,12 @@ final class AlphaBetaBlack {
             final List<Tile> moveTiles = white.getMoveTiles(grid);
             for (int index = (moveTiles.size() - 1); index >= 0; --index) {
                 Tile moveTile = moveTiles.get(index);
-                previousTile.removeOccupant();
                 if (white.isPawn() && previousRow == 1) {
                     Queen replace = Pawn.promote(white);
-                    moveTile.setOccupant(replace);
+                    previousTile.setOccupant(replace);
                     int pawnIndex = whites.indexOf(white);
                     whites.set(pawnIndex, replace);
-                    grid.setProtections(whites, blacks);
+                    MoveUtils.doMove(grid, whites, blacks, moveTile, previousTile);
                     if (!whiteKing.inCheck(grid)) {
                         replace.increaseMoveCount();
                         int result = max(grid, whites, blacks, depth, alpha, beta);
@@ -292,21 +285,16 @@ final class AlphaBetaBlack {
                             beta = value;
                         }
                         if (beta <= alpha) {
-                            previousTile.setOccupant(white);
-                            moveTile.removeOccupant();
-                            whites.set(pawnIndex, white);
-                            grid.setProtections(whites, blacks);
+                            MoveUtils.undoWhiteMovePromotion(grid, whites, blacks, white, pawnIndex, moveTile, previousTile);
+                            clonedGrid.equals(grid);
                             return beta;
                         }
                     }
-                    previousTile.setOccupant(white);
-                    moveTile.removeOccupant();
-                    whites.set(pawnIndex, white);
-                    grid.setProtections(whites, blacks);
+                    MoveUtils.undoWhiteMovePromotion(grid, whites, blacks, white, pawnIndex, moveTile, previousTile);
+                    clonedGrid.equals(grid);
                 }
                 else {
-                    moveTile.setOccupant(white);
-                    grid.setProtections(whites, blacks);
+                    MoveUtils.doMove(grid, whites, blacks, moveTile, previousTile);
                     if (!whiteKing.inCheck(grid)) {
                         white.increaseMoveCount();
                         int result = max(grid, whites, blacks, depth, alpha, beta);
@@ -318,19 +306,18 @@ final class AlphaBetaBlack {
                         }
                         white.decreaseMoveCount();
                         if (beta <= alpha) {
-                            previousTile.setOccupant(white);
-                            moveTile.removeOccupant();
-                            grid.setProtections(whites, blacks);
+                            MoveUtils.undoMove(grid, whites, blacks, moveTile, previousTile);
+                            clonedGrid.equals(grid);
                             return beta;
                         }
                     }
-                    previousTile.setOccupant(white);
-                    moveTile.removeOccupant();
-                    grid.setProtections(whites, blacks);
+                    MoveUtils.undoMove(grid, whites, blacks, moveTile, previousTile);
+                    clonedGrid.equals(grid);
                 }
             }
         }
-
+        
+        clonedGrid.equals(grid);
         return (value == POSITIVE_INFINITY) ? checkWhiteEndGame(grid, whiteKing, depth + 1) : beta;
     }
 
@@ -350,6 +337,8 @@ final class AlphaBetaBlack {
         if (depth == 0 || AI.TIMER.timeOver()) {
             return Evaluator.evaluateInBlackPerspective(grid, whites, blacks);
         }
+        
+        Grid clonedGrid = SECURE_MODE ? new Grid(grid) : grid;
 
         --depth;
         int value = NEGATIVE_INFINITY;
@@ -389,6 +378,8 @@ final class AlphaBetaBlack {
                     kingCastleTile.removeOccupant();
                     leftRookCastleTile.removeOccupant();
                     grid.setProtections(whites, blacks);
+                    
+                    clonedGrid.equals(grid);
 
                     if (beta <= alpha) {
                         return alpha;
@@ -422,6 +413,8 @@ final class AlphaBetaBlack {
                     kingCastleTile.removeOccupant();
                     rightRookCastleTile.removeOccupant();
                     grid.setProtections(whites, blacks);
+                    
+                    clonedGrid.equals(grid);
 
                     if (beta <= alpha) {
                         return alpha;
@@ -444,14 +437,12 @@ final class AlphaBetaBlack {
                 if (enemy.isKing()) {
                     continue;
                 }
-                previousTile.removeOccupant();
                 if (black.isPawn() && previousRow == 6) {
                     Queen replace = Pawn.promote(black);
-                    attackTile.setOccupant(replace);
+                    previousTile.setOccupant(replace);
                     int pawnIndex = blacks.indexOf(black);
                     blacks.set(pawnIndex, replace);
-                    int removeIndex = Pieces.remove(whites, enemy);
-                    grid.setProtections(whites, blacks);
+                    int removeIndex = MoveUtils.doBlackCapture(grid, whites, blacks, attackTile, previousTile);
                     if (!blackKing.inCheck(grid)) {
                         replace.increaseMoveCount();
                         int result = min(grid, whites, blacks, depth, alpha, beta);
@@ -462,24 +453,16 @@ final class AlphaBetaBlack {
                             alpha = value;
                         }
                         if (beta <= alpha) {
-                            previousTile.setOccupant(black);
-                            attackTile.setOccupant(enemy);
-                            blacks.set(pawnIndex, black);
-                            whites.add(removeIndex, enemy);
-                            grid.setProtections(whites, blacks);
+                            MoveUtils.undoBlackCapturePromotion(grid, whites, blacks, black, pawnIndex, enemy, removeIndex, attackTile, previousTile);
+                            clonedGrid.equals(grid);
                             return alpha;
                         }
                     }
-                    previousTile.setOccupant(black);
-                    attackTile.setOccupant(enemy);
-                    blacks.set(pawnIndex, black);
-                    whites.add(removeIndex, enemy);
-                    grid.setProtections(whites, blacks);
+                    MoveUtils.undoBlackCapturePromotion(grid, whites, blacks, black, pawnIndex, enemy, removeIndex, attackTile, previousTile);
+                    clonedGrid.equals(grid);
                 }
                 else {
-                    attackTile.setOccupant(black);
-                    int removeIndex = Pieces.remove(whites, enemy);
-                    grid.setProtections(whites, blacks);
+                    int removeIndex = MoveUtils.doBlackCapture(grid, whites, blacks, attackTile, previousTile);
                     if (!blackKing.inCheck(grid)) {
                         black.increaseMoveCount();
                         int result = min(grid, whites, blacks, depth, alpha, beta);
@@ -491,17 +474,13 @@ final class AlphaBetaBlack {
                         }
                         black.decreaseMoveCount();
                         if (beta <= alpha) {
-                            previousTile.setOccupant(black);
-                            attackTile.setOccupant(enemy);
-                            whites.add(removeIndex, enemy);
-                            grid.setProtections(whites, blacks);
+                            MoveUtils.undoBlackCapture(grid, whites, blacks, enemy, removeIndex, attackTile, previousTile);
+                            clonedGrid.equals(grid);
                             return alpha;
                         }
                     }
-                    previousTile.setOccupant(black);
-                    attackTile.setOccupant(enemy);
-                    whites.add(removeIndex, enemy);
-                    grid.setProtections(whites, blacks);
+                    MoveUtils.undoBlackCapture(grid, whites, blacks, enemy, removeIndex, attackTile, previousTile);                           
+                    clonedGrid.equals(grid);
                 }
             }
             /*
@@ -577,7 +556,7 @@ final class AlphaBetaBlack {
                     }
                 }
             }
-            */
+             */
         }
 
         for (int pieceIndex = 0; pieceIndex != numberOfBlackPieces; ++pieceIndex) {
@@ -588,13 +567,12 @@ final class AlphaBetaBlack {
             final List<Tile> moveTiles = black.getMoveTiles(grid);
             for (int index = (moveTiles.size() - 1); index >= 0; --index) {
                 Tile moveTile = moveTiles.get(index);
-                previousTile.removeOccupant();
                 if (black.isPawn() && previousRow == 6) {
                     Queen replace = Pawn.promote(black);
-                    moveTile.setOccupant(replace);
+                    previousTile.setOccupant(replace);
                     int pawnIndex = blacks.indexOf(black);
                     blacks.set(pawnIndex, replace);
-                    grid.setProtections(whites, blacks);
+                    MoveUtils.doMove(grid, whites, blacks, moveTile, previousTile);
                     if (!blackKing.inCheck(grid)) {
                         replace.increaseMoveCount();
                         int result = min(grid, whites, blacks, depth, alpha, beta);
@@ -605,21 +583,16 @@ final class AlphaBetaBlack {
                             alpha = value;
                         }
                         if (beta <= alpha) {
-                            previousTile.setOccupant(black);
-                            moveTile.removeOccupant();
-                            blacks.set(pawnIndex, black);
-                            grid.setProtections(whites, blacks);
+                            MoveUtils.undoWhiteMovePromotion(grid, whites, blacks, black, pawnIndex, moveTile, previousTile);
+                            clonedGrid.equals(grid);
                             return alpha;
                         }
                     }
-                    previousTile.setOccupant(black);
-                    moveTile.removeOccupant();
-                    blacks.set(pawnIndex, black);
-                    grid.setProtections(whites, blacks);
+                    MoveUtils.undoWhiteMovePromotion(grid, whites, blacks, black, pawnIndex, moveTile, previousTile);
+                    clonedGrid.equals(grid);
                 }
                 else {
-                    moveTile.setOccupant(black);
-                    grid.setProtections(whites, blacks);
+                    MoveUtils.doMove(grid, whites, blacks, moveTile, previousTile);
                     if (!blackKing.inCheck(grid)) {
                         black.increaseMoveCount();
                         int result = min(grid, whites, blacks, depth, alpha, beta);
@@ -631,15 +604,13 @@ final class AlphaBetaBlack {
                         }
                         black.decreaseMoveCount();
                         if (beta <= alpha) {
-                            previousTile.setOccupant(black);
-                            moveTile.removeOccupant();
-                            grid.setProtections(whites, blacks);
+                            MoveUtils.undoMove(grid, whites, blacks, moveTile, previousTile);
+                            clonedGrid.equals(grid);
                             return alpha;
                         }
                     }
-                    previousTile.setOccupant(black);
-                    moveTile.removeOccupant();
-                    grid.setProtections(whites, blacks);
+                    MoveUtils.undoMove(grid, whites, blacks, moveTile, previousTile);
+                    clonedGrid.equals(grid);
                 }
             }
         }

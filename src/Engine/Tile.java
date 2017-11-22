@@ -105,6 +105,12 @@ public final class Tile implements Locatable {
         return occupant;
     }
     
+    public Piece popOccupant() {
+        Piece piece = occupant;
+        occupant = null;
+        return piece;
+    }
+    
     public void setOccupant(Piece newOccupant) {
         occupant = null;
         (occupant = newOccupant).setLocation(row, column);

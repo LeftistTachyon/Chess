@@ -1,13 +1,122 @@
 package GUI;
 
 import Util.ChessConstants;
+import static Util.ChessConstants.MAX_NUMBER_OF_PIECES_PER_SIDE;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public final class Pieces {
 
+    
+    @SuppressWarnings("Convert2Lambda")
+    static final Comparator<Piece> BEST_PIECES_FIRST = new Comparator<Piece>() {
+        @Override
+        public int compare(Piece first, Piece next) {
+            return next.compareTo(first);
+        }
+    };
+
+    @SuppressWarnings("Convert2Lambda")
+    static final Comparator<Piece> BEST_PIECES_LAST = new Comparator<Piece>() {
+        @Override
+        public int compare(Piece first, Piece next) {
+            return first.compareTo(next);
+        }
+    };
+    
+    static final List<Piece> WHITES = new ArrayList<>(ChessConstants.MAX_NUMBER_OF_PIECES_PER_SIDE);
+    static final List<Piece> BLACKS = new ArrayList<>(ChessConstants.MAX_NUMBER_OF_PIECES_PER_SIDE);
+
     private Pieces() {
 
+    }
+
+    /**
+     * Sorts the given list of pieces. White pieces are moved to the front of
+     * the list and are then ordered from greatest to least value. Then Black
+     * pieces are moved to the remaining index positions after the white pieces
+     * and are then ordered from least to greatest value. Note that this method
+     * is NOT thread-safe and cannot be safely accessed by multiple threads.
+     *
+     * @param pieces The given list of pieces.
+     */
+    static void sort(List<Piece> pieces) {
+        for (int index = 0, size = pieces.size(); index != size; ++index) {
+            Piece piece = pieces.get(index);
+            if (piece.isWhite()) {
+                WHITES.add(piece);
+            }
+            else {
+                BLACKS.add(piece);
+            }
+        }
+        WHITES.sort(BEST_PIECES_FIRST);
+        BLACKS.sort(BEST_PIECES_LAST);
+        pieces.clear();
+        pieces.addAll(WHITES);
+        pieces.addAll(BLACKS);
+        WHITES.clear();
+        BLACKS.clear();
+    }
+
+    /**
+     * Returns the index of a piece object in a list of pieces and removes the
+     * piece from the list.
+     *
+     * @param pieces The given list of pieces.
+     * @param piece The given piece to remove.
+     * @return The index of the given piece in the given list of pieces.
+     */
+    static int remove(List<Piece> pieces, Piece piece) {
+        int index = pieces.lastIndexOf(piece); //starting from the least valuable pieces
+        pieces.remove(index);
+        return index;
+    }
+
+    /**
+     * Returns a list of white pieces from the given list of pieces. The given
+     * list of pieces must be sorted as dictated by the {
+     *
+     * @see sort(java.util.List)} method.
+     * @param pieces The given list of pieces.
+     * @return A list of white pieces from the given list of pieces.
+     */
+    static List<Piece> getWhite(List<Piece> pieces) {
+        List<Piece> whites = new ArrayList<>(MAX_NUMBER_OF_PIECES_PER_SIDE);
+        for (int index = 0, size = pieces.size(); index != size; ++index) {
+            Piece piece = pieces.get(index);
+            if (piece.isWhite()) {
+                whites.add(piece);
+            }
+            else {
+                //expect cutoff, the list is sorted
+                return whites;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns a list of black pieces from the given list of pieces. The given
+     * list of pieces must be sorted as dictated by the {
+     *
+     * @see sort(java.util.List)} method.
+     * @param pieces The given list of pieces.
+     * @return A list of black pieces from the given list of pieces.
+     */
+    static List<Piece> getBlack(List<Piece> pieces) {
+        List<Piece> blacks = new ArrayList<>(MAX_NUMBER_OF_PIECES_PER_SIDE);
+        for (int index = (pieces.size() - 1); index != -1; --index) {
+            Piece piece = pieces.get(index);
+            if (piece.isBlack()) {
+                blacks.add(piece);
+            }
+            else {
+                return blacks;
+            }
+        }
+        return null;
     }
 
     public static List<Piece> getDeepCopy(List<Piece> pieces) {

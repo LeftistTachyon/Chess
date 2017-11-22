@@ -30,12 +30,12 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 /**
- * NOTE: ENPASSANT IS DISABLED
- * I may change my logic to only consider search results only if they all finish
- * a particular depth. If some searches at a depth do not finish, they WILL
- * adversely affect the selection of moves from the AI, thus this cannot be
- * countered by the argument that such deeper searches yield more data. This
- * scenario pops up often after using parallel processing.
+ * NOTE: ENPASSANT IS ENABLED I may change my logic to only consider search
+ * results only if they all finish a particular depth. If some searches at a
+ * depth do not finish, they WILL adversely affect the selection of moves from
+ * the AI, thus this cannot be countered by the argument that such deeper
+ * searches yield more data. This scenario pops up often after using parallel
+ * processing.
  *
  * Bug, Non-parallel processing with depth extension (aka default mode) having
  * trouble finding checkmate, most likely located in this class, as parallel
@@ -47,9 +47,9 @@ import javax.swing.JPanel;
  * Could make parallel search better by conducting a single threaded search to
  * depth 3, then sorting and starting parallel searching. However, there may be
  * no need since each position is searched at the same time.
- * 
- * Although making sure all results are of the same depth is critical,
- * if a branch detects a checkmate, we should return that branch immediately
+ *
+ * Although making sure all results are of the same depth is critical, if a
+ * branch detects a checkmate, we should return that branch immediately
  */
 public final class AI {
 
@@ -355,7 +355,7 @@ public final class AI {
         //For Debugging:
         final List<Piece> clonedPieces = Pieces.getDeepCopy(pieces);
         final Grid clonedGrid = new Grid(grid);
-        
+
         Tester.value(grid);
 
         if (side) {
@@ -381,7 +381,13 @@ public final class AI {
 
                             whiteKing.increaseMoveCount();
                             leftRook.increaseMoveCount();
-                            possiblePositions.add(new PositionHolder(new Grid(grid), "White King castles left from " + previousTile.getNotationLocation() + " to " + whiteKing.getNotationLocation() + " and the White Rook at [1,A] has moved to [1,D]."));
+                            {
+                                Piece pawn = Pieces.checkWhiteEnPassantRights(pieces);
+                                possiblePositions.add(new PositionHolder(new Grid(grid), "White King castles left from " + previousTile.getNotationLocation() + " to " + whiteKing.getNotationLocation() + " and the White Rook at [1,A] has moved to [1,D]."));
+                                if (pawn != null) {
+                                    pawn.setJustMadeDoubleJump(true);
+                                }
+                            }
                             whiteKing.decreaseMoveCount();
                             leftRook.decreaseMoveCount();
 
@@ -404,7 +410,13 @@ public final class AI {
 
                             whiteKing.increaseMoveCount();
                             rightRook.increaseMoveCount();
-                            possiblePositions.add(new PositionHolder(new Grid(grid), "White King castles right from " + previousTile.getNotationLocation() + " to " + whiteKing.getNotationLocation() + " and the White Rook at [1,H] has moved to [1,F]."));
+                            {
+                                Piece pawn = Pieces.checkWhiteEnPassantRights(pieces);
+                                possiblePositions.add(new PositionHolder(new Grid(grid), "White King castles right from " + previousTile.getNotationLocation() + " to " + whiteKing.getNotationLocation() + " and the White Rook at [1,H] has moved to [1,F]."));
+                                if (pawn != null) {
+                                    pawn.setJustMadeDoubleJump(true);
+                                }
+                            }
                             whiteKing.decreaseMoveCount();
                             rightRook.decreaseMoveCount();
 
@@ -437,7 +449,13 @@ public final class AI {
                             grid.setProtections(pieces);
                             if (!whiteKing.inCheck(grid)) {
                                 replace.increaseMoveCount();
-                                possiblePositions.add(new PositionHolder(new Grid(grid), "White Pawn at " + previousTile.getNotationLocation() + " has captured " + enemy.getName() + " at " + replace.getNotationLocation() + " and has been promoted to a White Queen."));
+                                {
+                                    Piece pawn = Pieces.checkWhiteEnPassantRights(pieces);
+                                    possiblePositions.add(new PositionHolder(new Grid(grid), "White Pawn at " + previousTile.getNotationLocation() + " has captured " + enemy.getName() + " at " + replace.getNotationLocation() + " and has been promoted to a White Queen."));
+                                    if (pawn != null) {
+                                        pawn.setJustMadeDoubleJump(true);
+                                    }
+                                }
                             }
                             previousTile.setOccupant(white);
                             attackTile.setOccupant(enemy);
@@ -451,7 +469,13 @@ public final class AI {
                             grid.setProtections(pieces);
                             if (!whiteKing.inCheck(grid)) {
                                 white.increaseMoveCount();
-                                possiblePositions.add(new PositionHolder(new Grid(grid), white.getName() + " at " + previousTile.getNotationLocation() + " has captured " + enemy.getName() + " at " + white.getNotationLocation()));
+                                {
+                                    Piece pawn = Pieces.checkWhiteEnPassantRights(pieces);
+                                    possiblePositions.add(new PositionHolder(new Grid(grid), white.getName() + " at " + previousTile.getNotationLocation() + " has captured " + enemy.getName() + " at " + white.getNotationLocation()));
+                                    if (pawn != null) {
+                                        pawn.setJustMadeDoubleJump(true);
+                                    }
+                                }
                                 white.decreaseMoveCount();
                             }
                             previousTile.setOccupant(white);
@@ -461,11 +485,9 @@ public final class AI {
                         }
                         Tester.check(grid, clonedGrid, pieces, clonedPieces);
                     }
-                    /*
                     if (white.isPawn()) {
-                        Pawn pawn = (Pawn) white;
                         {
-                            Tile enPassantTile = pawn.getLeftEnPassantTile(grid);
+                            Tile enPassantTile = white.getLeftEnPassantTile(grid);
                             if (enPassantTile != null) {
                                 Tile blackPawnTile = grid.getTile(previousRow, previousColumn - 1);
                                 Piece blackPawn = blackPawnTile.getOccupant();
@@ -476,7 +498,13 @@ public final class AI {
                                 grid.setProtections(pieces);
                                 if (!whiteKing.inCheck(grid)) {
                                     white.increaseMoveCount();
-                                    possiblePositions.add(new PositionHolder(new Grid(grid), "White Pawn at " + previousTile.getNotationLocation() + " performed enpassant capture on the Black Pawn at " + blackPawn.getNotationLocation() + " and has moved from " + previousTile.getNotationLocation() + " to " + white.getNotationLocation()));
+                                    {
+                                        Piece pawn = Pieces.checkWhiteEnPassantRights(pieces);
+                                        possiblePositions.add(new PositionHolder(new Grid(grid), "White Pawn at " + previousTile.getNotationLocation() + " performed enpassant capture on the Black Pawn at " + blackPawn.getNotationLocation() + " and has moved from " + previousTile.getNotationLocation() + " to " + white.getNotationLocation()));
+                                        if (pawn != null) {
+                                            pawn.setJustMadeDoubleJump(true);
+                                        }
+                                    }
                                     white.decreaseMoveCount();
                                 }
                                 previousTile.setOccupant(white);
@@ -487,7 +515,7 @@ public final class AI {
                             }
                         }
                         {
-                            Tile enPassantTile = pawn.getRightEnPassantTile(grid);
+                            Tile enPassantTile = white.getRightEnPassantTile(grid);
                             if (enPassantTile != null) {
                                 Tile blackPawnTile = grid.getTile(previousRow, previousColumn + 1);
                                 Piece blackPawn = blackPawnTile.getOccupant();
@@ -498,7 +526,13 @@ public final class AI {
                                 grid.setProtections(pieces);
                                 if (!whiteKing.inCheck(grid)) {
                                     white.increaseMoveCount();
-                                    possiblePositions.add(new PositionHolder(new Grid(grid), "White Pawn at " + previousTile.getNotationLocation() + " performed enpassant capture on the Black Pawn at " + blackPawn.getNotationLocation() + " and has moved from " + previousTile.getNotationLocation() + " to " + white.getNotationLocation()));
+                                    {
+                                        Piece pawn = Pieces.checkWhiteEnPassantRights(pieces);
+                                        possiblePositions.add(new PositionHolder(new Grid(grid), "White Pawn at " + previousTile.getNotationLocation() + " performed enpassant capture on the Black Pawn at " + blackPawn.getNotationLocation() + " and has moved from " + previousTile.getNotationLocation() + " to " + white.getNotationLocation()));
+                                        if (pawn != null) {
+                                            pawn.setJustMadeDoubleJump(true);
+                                        }
+                                    }
                                     white.decreaseMoveCount();
                                 }
                                 previousTile.setOccupant(white);
@@ -509,7 +543,6 @@ public final class AI {
                             }
                         }
                     }
-                     */
                 }
 
                 for (int pieceIndex = 0; pieceIndex != NUMBER_OF_WHITE_PIECES; ++pieceIndex) {
@@ -529,7 +562,13 @@ public final class AI {
                             grid.setProtections(pieces);
                             if (!whiteKing.inCheck(grid)) {
                                 replace.increaseMoveCount();
-                                possiblePositions.add(new PositionHolder(new Grid(grid), "White Pawn at " + previousTile.getNotationLocation() + " has moved to " + replace.getNotationLocation() + " and has been promoted to a White Queen."));
+                                {
+                                    Piece pawn = Pieces.checkWhiteEnPassantRights(pieces);
+                                    possiblePositions.add(new PositionHolder(new Grid(grid), "White Pawn at " + previousTile.getNotationLocation() + " has moved to " + replace.getNotationLocation() + " and has been promoted to a White Queen."));
+                                    if (pawn != null) {
+                                        pawn.setJustMadeDoubleJump(true);
+                                    }
+                                }
                             }
                             previousTile.setOccupant(white);
                             moveTile.removeOccupant();
@@ -541,7 +580,13 @@ public final class AI {
                             grid.setProtections(pieces);
                             if (!whiteKing.inCheck(grid)) {
                                 white.increaseMoveCount();
-                                possiblePositions.add(new PositionHolder(new Grid(grid), white.getName() + " at " + previousTile.getNotationLocation() + " has moved to " + white.getNotationLocation()));
+                                {
+                                    Piece pawn = Pieces.checkWhiteEnPassantRights(pieces);
+                                    possiblePositions.add(new PositionHolder(new Grid(grid), white.getName() + " at " + previousTile.getNotationLocation() + " has moved to " + white.getNotationLocation()));
+                                    if (pawn != null) {
+                                        pawn.setJustMadeDoubleJump(true);
+                                    }
+                                }
                                 white.decreaseMoveCount();
                             }
                             previousTile.setOccupant(white);
@@ -563,10 +608,12 @@ public final class AI {
             list.clear();
 
             final int numberOfPositions = possiblePositions.size();
-
+            
             if (numberOfPositions != Tester.perft(grid, 1, !side)) {
                 throw new InternalError();
             }
+            
+            System.out.println("Number of positions from given position: " + numberOfPositions);
 
             if (numberOfPositions == 0) {
                 DIALOG.disableUpdate();
@@ -578,9 +625,10 @@ public final class AI {
                 pieces.clear();
                 return;
             }
-            
+
             //update the dialog if not game over
             DIALOG.reset();
+            DIALOG.setTotalMoves(numberOfPositions);
 
             PositionHolder bestPosition = possiblePositions.get(0);
 
@@ -667,6 +715,7 @@ public final class AI {
                             break Iterative_Deepening;
                         }
                         position.value = result;
+                        DIALOG.increaseMovesCompleted();
                     }
                     //at this point the current depth has been fully searched
                     //so now we sort the higher scoring positions to look at first
@@ -675,6 +724,7 @@ public final class AI {
                     DIALOG.setMaxPositionValue((bestPosition = possiblePositions.get(0)).value);
                     DIALOG.setFinishedDepth(searchDepth);
                     previousIterationTime = timer.timeElapsed() - depthStartTime;
+                    DIALOG.setMovesCompleted(0);
                     System.out.println("Depth: " + searchDepth + " Time Taken: " + previousIterationTime);
                 }
                 System.out.println();
@@ -746,6 +796,8 @@ public final class AI {
                 Tester.checkProtections(pieces, side);
                 for (int index = 0; index != numberOfPositions; ++index) {
                     PositionHolder current = possiblePositions.get(index);
+                    Tester.check(current.grid, current.clonedGrid, current.whites, current.clonedWhites);
+                    Tester.check(current.grid, current.clonedGrid, current.blacks, current.clonedBlacks);
                     int alphaBeta = AlphaBetaWhite.min(current.grid, current.whites, current.blacks, TEST_DEPTH, NEGATIVE_INFINITY, POSITIVE_INFINITY);
                     int minMax = MinMaxWhite.min(current.grid, current.whites, current.blacks, TEST_DEPTH);
                     if (alphaBeta != minMax) {
@@ -789,7 +841,13 @@ public final class AI {
 
                             blackKing.increaseMoveCount();
                             leftRook.increaseMoveCount();
-                            possiblePositions.add(new PositionHolder(new Grid(grid), "Black King castles left from " + previousTile.getNotationLocation() + " to " + blackKing.getNotationLocation() + " and the Black Rook at [8,A] has moved to [8,D]."));
+                            {
+                                Piece pawn = Pieces.checkBlackEnPassantRights(pieces);
+                                possiblePositions.add(new PositionHolder(new Grid(grid), "Black King castles left from " + previousTile.getNotationLocation() + " to " + blackKing.getNotationLocation() + " and the Black Rook at [8,A] has moved to [8,D]."));
+                                if (pawn != null) {
+                                    pawn.setJustMadeDoubleJump(true);
+                                }
+                            }
                             blackKing.decreaseMoveCount();
                             leftRook.decreaseMoveCount();
 
@@ -812,7 +870,13 @@ public final class AI {
 
                             blackKing.increaseMoveCount();
                             rightRook.increaseMoveCount();
-                            possiblePositions.add(new PositionHolder(new Grid(grid), "Black King castles right from " + previousTile.getNotationLocation() + " to " + blackKing.getNotationLocation() + " and the Black Rook at [8,H] has moved to [8,F]."));
+                            {
+                                Piece pawn = Pieces.checkBlackEnPassantRights(pieces);
+                                possiblePositions.add(new PositionHolder(new Grid(grid), "Black King castles right from " + previousTile.getNotationLocation() + " to " + blackKing.getNotationLocation() + " and the Black Rook at [8,H] has moved to [8,F]."));
+                                if (pawn != null) {
+                                    pawn.setJustMadeDoubleJump(true);
+                                }
+                            }
                             blackKing.decreaseMoveCount();
                             rightRook.decreaseMoveCount();
 
@@ -845,7 +909,13 @@ public final class AI {
                             grid.setProtections(pieces);
                             if (!blackKing.inCheck(grid)) {
                                 replace.increaseMoveCount();
-                                possiblePositions.add(new PositionHolder(new Grid(grid), "Black Pawn at " + previousTile.getNotationLocation() + " has captured " + enemy.getName() + " at " + replace.getNotationLocation() + " and has been promoted to a Black Queen."));
+                                {
+                                    Piece pawn = Pieces.checkBlackEnPassantRights(pieces);
+                                    possiblePositions.add(new PositionHolder(new Grid(grid), "Black Pawn at " + previousTile.getNotationLocation() + " has captured " + enemy.getName() + " at " + replace.getNotationLocation() + " and has been promoted to a Black Queen."));
+                                    if (pawn != null) {
+                                        pawn.setJustMadeDoubleJump(true);
+                                    }
+                                }
                             }
                             previousTile.setOccupant(black);
                             attackTile.setOccupant(enemy);
@@ -859,7 +929,13 @@ public final class AI {
                             grid.setProtections(pieces);
                             if (!blackKing.inCheck(grid)) {
                                 black.increaseMoveCount();
-                                possiblePositions.add(new PositionHolder(new Grid(grid), black.getName() + " at " + previousTile.getNotationLocation() + " has captured " + enemy.getName() + " at " + black.getNotationLocation()));
+                                {
+                                    Piece pawn = Pieces.checkBlackEnPassantRights(pieces);
+                                    possiblePositions.add(new PositionHolder(new Grid(grid), black.getName() + " at " + previousTile.getNotationLocation() + " has captured " + enemy.getName() + " at " + black.getNotationLocation()));
+                                    if (pawn != null) {
+                                        pawn.setJustMadeDoubleJump(true);
+                                    }
+                                }
                                 black.decreaseMoveCount();
                             }
                             previousTile.setOccupant(black);
@@ -869,11 +945,9 @@ public final class AI {
                         }
                         Tester.check(grid, clonedGrid, pieces, clonedPieces);
                     }
-                    /*
                     if (black.isPawn()) {
-                        Pawn pawn = (Pawn) black;
                         {
-                            Tile enPassantTile = pawn.getLeftEnPassantTile(grid);
+                            Tile enPassantTile = black.getLeftEnPassantTile(grid);
                             if (enPassantTile != null) {
                                 Tile whitePawnTile = grid.getTile(previousRow, previousColumn - 1);
                                 Piece whitePawn = whitePawnTile.getOccupant();
@@ -884,7 +958,13 @@ public final class AI {
                                 grid.setProtections(pieces);
                                 if (!blackKing.inCheck(grid)) {
                                     black.increaseMoveCount();
-                                    possiblePositions.add(new PositionHolder(new Grid(grid), "Black Pawn at " + previousTile.getNotationLocation() + " performed enpassant capture on the Black Pawn at " + whitePawn.getNotationLocation() + " and has moved from " + previousTile.getNotationLocation() + " to " + black.getNotationLocation()));
+                                    {
+                                        Piece pawn = Pieces.checkBlackEnPassantRights(pieces);
+                                        possiblePositions.add(new PositionHolder(new Grid(grid), "Black Pawn at " + previousTile.getNotationLocation() + " performed enpassant capture on the Black Pawn at " + whitePawn.getNotationLocation() + " and has moved from " + previousTile.getNotationLocation() + " to " + black.getNotationLocation()));
+                                        if (pawn != null) {
+                                            pawn.setJustMadeDoubleJump(true);
+                                        }
+                                    }
                                     black.decreaseMoveCount();
                                 }
                                 previousTile.setOccupant(black);
@@ -895,7 +975,7 @@ public final class AI {
                             }
                         }
                         {
-                            Tile enPassantTile = pawn.getRightEnPassantTile(grid);
+                            Tile enPassantTile = black.getRightEnPassantTile(grid);
                             if (enPassantTile != null) {
                                 Tile whitePawnTile = grid.getTile(previousRow, previousColumn + 1);
                                 Piece whitePawn = whitePawnTile.getOccupant();
@@ -906,7 +986,13 @@ public final class AI {
                                 grid.setProtections(pieces);
                                 if (!blackKing.inCheck(grid)) {
                                     black.increaseMoveCount();
-                                    possiblePositions.add(new PositionHolder(new Grid(grid), "Black Pawn at " + previousTile.getNotationLocation() + " performed enpassant capture on the Black Pawn at " + whitePawn.getNotationLocation() + " and has moved from " + previousTile.getNotationLocation() + " to " + black.getNotationLocation()));
+                                    {
+                                        Piece pawn = Pieces.checkBlackEnPassantRights(pieces);
+                                        possiblePositions.add(new PositionHolder(new Grid(grid), "Black Pawn at " + previousTile.getNotationLocation() + " performed enpassant capture on the Black Pawn at " + whitePawn.getNotationLocation() + " and has moved from " + previousTile.getNotationLocation() + " to " + black.getNotationLocation()));
+                                        if (pawn != null) {
+                                            pawn.setJustMadeDoubleJump(true);
+                                        }
+                                    }
                                     black.decreaseMoveCount();
                                 }
                                 previousTile.setOccupant(black);
@@ -916,10 +1002,8 @@ public final class AI {
                                 grid.setProtections(pieces);
                             }
                         }
-
                         Tester.check(grid, clonedGrid, pieces, clonedPieces);
                     }
-                     */
                 }
 
                 for (int pieceIndex = 0; pieceIndex != NUMBER_OF_BLACK_PIECES; ++pieceIndex) {
@@ -939,7 +1023,13 @@ public final class AI {
                             grid.setProtections(pieces);
                             if (!blackKing.inCheck(grid)) {
                                 replace.increaseMoveCount();
-                                possiblePositions.add(new PositionHolder(new Grid(grid), "Black Pawn at " + previousTile.getNotationLocation() + " has moved to " + replace.getNotationLocation() + " and has been promoted to a Black Queen."));
+                                {
+                                    Piece pawn = Pieces.checkBlackEnPassantRights(pieces);
+                                    possiblePositions.add(new PositionHolder(new Grid(grid), "Black Pawn at " + previousTile.getNotationLocation() + " has moved to " + replace.getNotationLocation() + " and has been promoted to a Black Queen."));
+                                    if (pawn != null) {
+                                        pawn.setJustMadeDoubleJump(true);
+                                    }
+                                }
                             }
                             previousTile.setOccupant(black);
                             moveTile.removeOccupant();
@@ -951,7 +1041,13 @@ public final class AI {
                             grid.setProtections(pieces);
                             if (!blackKing.inCheck(grid)) {
                                 black.increaseMoveCount();
-                                possiblePositions.add(new PositionHolder(new Grid(grid), black.getName() + " at " + previousTile.getNotationLocation() + " has moved to " + black.getNotationLocation()));
+                                {
+                                    Piece pawn = Pieces.checkBlackEnPassantRights(pieces);
+                                    possiblePositions.add(new PositionHolder(new Grid(grid), black.getName() + " at " + previousTile.getNotationLocation() + " has moved to " + black.getNotationLocation()));
+                                    if (pawn != null) {
+                                        pawn.setJustMadeDoubleJump(true);
+                                    }
+                                }
                                 black.decreaseMoveCount();
                             }
                             previousTile.setOccupant(black);
@@ -973,9 +1069,12 @@ public final class AI {
             list.clear();
 
             final int numberOfPositions = possiblePositions.size();
+            
             if (numberOfPositions != Tester.perft(grid, 1, !side)) {
                 throw new InternalError();
             }
+            
+            System.out.println("Number of positions from given position: " + numberOfPositions);
 
             if (numberOfPositions == 0) {
                 DIALOG.disableUpdate();
@@ -987,16 +1086,14 @@ public final class AI {
                 pieces.clear();
                 return;
             }
-            
+
             //update the dialog if not game over
             DIALOG.reset();
+            DIALOG.setTotalMoves(numberOfPositions);
 
             PositionHolder bestPosition = possiblePositions.get(0);
 
             if (parallel) {
-                //magic thomas gold
-                //can't wait
-                //again- arminvan buuren remix
                 ParallelSearch[] parallelSearches = new ParallelSearch[numberOfPositions];
                 Future[] futures = new Future[numberOfPositions];
                 ThreadPoolExecutor executor = new ThreadPoolExecutor(numberOfPositions,
@@ -1078,6 +1175,7 @@ public final class AI {
                             break Iterative_Deepening;
                         }
                         position.value = result;
+                        DIALOG.increaseMovesCompleted();
                     }
                     //at this point the current depth has been fully searched
                     //so now we sort the higher scoring positions to look at first
@@ -1086,6 +1184,7 @@ public final class AI {
                     DIALOG.setMaxPositionValue((bestPosition = possiblePositions.get(0)).value);
                     DIALOG.setFinishedDepth(searchDepth);
                     previousIterationTime = timer.timeElapsed() - depthStartTime;
+                    DIALOG.setMovesCompleted(0);
                     System.out.println("Depth: " + searchDepth + " Time Taken: " + previousIterationTime);
                 }
                 System.out.println();
@@ -1157,6 +1256,8 @@ public final class AI {
                 Tester.checkProtections(pieces, side);
                 for (int index = 0; index != numberOfPositions; ++index) {
                     PositionHolder current = possiblePositions.get(index);
+                    Tester.check(current.grid, current.clonedGrid, current.whites, current.clonedWhites);
+                    Tester.check(current.grid, current.clonedGrid, current.blacks, current.clonedBlacks);
                     int alphaBeta = AlphaBetaBlack.min(current.grid, current.whites, current.blacks, TEST_DEPTH, NEGATIVE_INFINITY, POSITIVE_INFINITY);
                     int minMax = MinMaxBlack.min(current.grid, current.whites, current.blacks, TEST_DEPTH);
                     if (alphaBeta != minMax) {
@@ -1187,7 +1288,7 @@ public final class AI {
         pieces.clear();
         possiblePositions.clear();
     }
-    
+
     void useTestDialog() {
         DIALOG = new AI.StatusDialog(new JFrame());
     }
@@ -1241,10 +1342,22 @@ public final class AI {
         void setFinishedDepth(int num) {
             view.depth = num;
         }
+        
+        void setTotalMoves(int totalMoves) {
+            view.totalMoves = totalMoves;
+        }
+        
+        void setMovesCompleted(int movesCompleted) {
+            view.movesCompleted = movesCompleted;
+        }
+        
+        void increaseMovesCompleted() {
+            ++view.movesCompleted;
+        }
 
         void reset() {
             view.update = true;
-            view.nodesScanned = view.depth = 0;
+            view.nodesScanned = view.depth = view.totalMoves = view.movesCompleted = 0;
             view.maxNodeValue = NEGATIVE_INFINITY;
         }
 
@@ -1256,6 +1369,8 @@ public final class AI {
             //private int nodesIgnored;
             private volatile int maxNodeValue;
             private volatile int depth;
+            private int totalMoves;
+            private int movesCompleted;
             private final String[] data = new String[5];
 
             @SuppressWarnings("CallToThreadStartDuringObjectConstruction")
@@ -1303,9 +1418,18 @@ public final class AI {
                     String line = data[index];
                     offscreenGraphics.drawString(line, 0, textHeight += Constants.getStringHeight(line, font, offscreenFontRenderContext));
                 }
+                
+                
                 int approximateTextHeight = (int) Math.ceil(textHeight);
+                
+                offscreenGraphics.setColor(Color.WHITE);
+                offscreenGraphics.fillRect(0, approximateTextHeight, width, 15);
+                offscreenGraphics.setColor(Color.GREEN);
+                offscreenGraphics.fillRect(0, approximateTextHeight, (int) (width * ((1.0 * movesCompleted) / (1.0 * totalMoves))), 15);
+                
+                
                 //offscreenGraphics.drawLine(0, approximateTextHeight, width, approximateTextHeight);
-                offscreenGraphics.drawImage(IMAGE, 0, approximateTextHeight, width, height - approximateTextHeight, this);
+                offscreenGraphics.drawImage(IMAGE, 0, approximateTextHeight + 15, width, height - approximateTextHeight, this);
                 window.drawImage(offscreenBuffer, 0, 0, this);
             }
 

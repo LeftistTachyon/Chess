@@ -4,44 +4,58 @@ import java.util.ArrayList;
 import java.util.List;
 import Util.ChessConstants;
 import static Util.ChessConstants.LENGTH;
+import static Util.Constants.SPACE;
 
-//Status: Done, note enPassant is disabled
+//Status: Done, note enPassant is enabled
+//remember enpassant tiles must be tinted properly here
+//in order for them to register on the board where
+//the user clicks on a tinted tile
 @SuppressWarnings("EqualsAndHashcode")
 public final class Pawn extends Piece {
-    
-    private boolean canEnPassant = true;
-    
+
+    private boolean justMadeDoubleJump = false;
+
     public Pawn(int x, int y, int width, int height, int row, int column, boolean color) {
         super(x, y, width, height, row, column, color, ChessConstants.PAWN);
     }
-    
+
     public Pawn(int row, int column, boolean color) {
         super(row, column, color, ChessConstants.PAWN);
     }
-    
+
     @Override
     @SuppressWarnings("CloneDoesntCallSuperClone")
     public Pawn clone() {
         Pawn copy = new Pawn(getX(), getY(), getWidth(), getHeight(), getRow(), getColumn(), isWhite());
         copy.setSelected(isSelected());
         copy.setMoveCount(getMoveCount());
-        copy.canEnPassant = canEnPassant;
+        copy.justMadeDoubleJump = justMadeDoubleJump;
         return copy;
     }
-    
+
     @Override
     public boolean equals(Object obj) {
-        return (!(obj instanceof Pawn)) ? false : (super.equals(obj) && (canEnPassant == ((Pawn) obj).canEnPassant));
+        return (!(obj instanceof Pawn)) ? false : (super.equals(obj) && (justMadeDoubleJump == ((Pawn) obj).justMadeDoubleJump));
     }
-    
+
     @Override
     public char getSymbol() {
         return isWhite() ? ChessConstants.WHITE_PAWN : ChessConstants.BLACK_PAWN;
     }
-    
+
     @Override
     public boolean isPawn() {
         return true;
+    }
+
+    @Override
+    public boolean justMadeDoubleJump() {
+        return justMadeDoubleJump && (getMoveCount() == 1) && (isWhite() ? (getRow() == 4) : (getRow() == 3));
+    }
+
+    @Override
+    public void setJustMadeDoubleJump(boolean doubleJumpJustPerformed) {
+        justMadeDoubleJump = doubleJumpJustPerformed;
     }
 
     @Override
@@ -198,14 +212,7 @@ public final class Pawn extends Piece {
         }
     }
 
-    public void setEnPassantPermission(boolean enPassantRight) {
-        canEnPassant = enPassantRight;
-    }
-
-    public boolean enPassantAuthorized() {
-        return canEnPassant;
-    }
-
+    @Override
     public List<Tile> getEnPassantTiles(Grid grid) {
         List<Tile> enPassantTiles = new ArrayList<>(ChessConstants.NUMBER_OF_PAWN_PROTECTED_TILES);
         Tile leftEnPassantTile = getLeftEnPassantTile(grid);
@@ -218,7 +225,8 @@ public final class Pawn extends Piece {
         }
         return enPassantTiles;
     }
-    
+
+    @Override
     public Tile getLeftEnPassantTile(Grid grid) {
         final int currentRow = getRow();
         if (isWhite()) {
@@ -232,7 +240,7 @@ public final class Pawn extends Piece {
                 Tile blackPawnTile = grid.getTile(currentRow, leftColumn);
                 if (blackPawnTile.isOccupied()) {
                     Piece blackPawn = blackPawnTile.getOccupant();
-                    if (blackPawn.isPawn() && blackPawn.isBlack() && !leftEnPassantTile.isOccupied()) {
+                    if (blackPawn.isPawn() && blackPawn.isBlack() && blackPawn.justMadeDoubleJump() && !leftEnPassantTile.isOccupied()) {
                         return leftEnPassantTile;
                     }
                 }
@@ -249,7 +257,7 @@ public final class Pawn extends Piece {
                 Tile whitePawnTile = grid.getTile(currentRow, leftColumn);
                 if (whitePawnTile.isOccupied()) {
                     Piece whitePawn = whitePawnTile.getOccupant();
-                    if (whitePawn.isPawn() && whitePawn.isWhite() && !leftEnPassantTile.isOccupied()) {
+                    if (whitePawn.isPawn() && whitePawn.isWhite() && whitePawn.justMadeDoubleJump() && !leftEnPassantTile.isOccupied()) {
                         return leftEnPassantTile;
                     }
                 }
@@ -257,7 +265,8 @@ public final class Pawn extends Piece {
         }
         return null;
     }
-    
+
+    @Override
     public Tile getRightEnPassantTile(Grid grid) {
         final int currentRow = getRow();
         if (isWhite()) {
@@ -271,7 +280,7 @@ public final class Pawn extends Piece {
                 Tile blackPawnTile = grid.getTile(currentRow, rightColumn);
                 if (blackPawnTile.isOccupied()) {
                     Piece blackPawn = blackPawnTile.getOccupant();
-                    if (blackPawn.isPawn() && blackPawn.isBlack() && !rightEnPassantTile.isOccupied()) {
+                    if (blackPawn.isPawn() && blackPawn.isBlack() && blackPawn.justMadeDoubleJump() && !rightEnPassantTile.isOccupied()) {
                         return rightEnPassantTile;
                     }
                 }
@@ -288,7 +297,7 @@ public final class Pawn extends Piece {
                 Tile whitePawnTile = grid.getTile(currentRow, rightColumn);
                 if (whitePawnTile.isOccupied()) {
                     Piece whitePawn = whitePawnTile.getOccupant();
-                    if (whitePawn.isPawn() && whitePawn.isWhite() && !rightEnPassantTile.isOccupied()) {
+                    if (whitePawn.isPawn() && whitePawn.isWhite() && whitePawn.justMadeDoubleJump() && !rightEnPassantTile.isOccupied()) {
                         return rightEnPassantTile;
                     }
                 }
@@ -300,16 +309,16 @@ public final class Pawn extends Piece {
     @Override
     public List<Tile> getLegalMoves(Grid grid) {
         List<Tile> legalMoves = super.getLegalMoves(grid);
-        /*
         Tile leftEnPassantTile = getLeftEnPassantTile(grid);
         if (leftEnPassantTile != null) {
             legalMoves.add(leftEnPassantTile);
+            leftEnPassantTile.setTint(Board.EN_PASSANT);
         }
         Tile rightEnPassantTile = getRightEnPassantTile(grid);
         if (rightEnPassantTile != null) {
             legalMoves.add(rightEnPassantTile);
+            rightEnPassantTile.setTint(Board.EN_PASSANT);
         }
-         */
         return legalMoves;
     }
 
@@ -331,7 +340,7 @@ public final class Pawn extends Piece {
                 Bishop promote = new Bishop(getX(), getY(), getWidth(), getHeight(), getRow(), getColumn(), isWhite());
                 promote.setSelected(isSelected());
                 promote.setMoveCount(getMoveCount());
-                return promote;   
+                return promote;
             }
             case ChessConstants.KNIGHT: {
                 Knight promote = new Knight(getX(), getY(), getWidth(), getHeight(), getRow(), getColumn(), isWhite());
@@ -341,5 +350,15 @@ public final class Pawn extends Piece {
             }
         }
         return null;
+    }
+
+    @Override
+    public String toOutputString() {
+        return super.toOutputString() + "[" + justMadeDoubleJump + "]";
+    }
+
+    @Override
+    public String toEngineString() {
+        return super.toEngineString() + SPACE + justMadeDoubleJump;
     }
 }

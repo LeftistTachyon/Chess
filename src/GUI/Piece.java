@@ -1,7 +1,7 @@
 package GUI;
 
 import Util.ChessConstants;
-import Util.Constants;
+import static Util.Constants.SPACE;
 import Util.ImageReader;
 import java.awt.Graphics;
 import java.awt.Image;
@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("EqualsAndHashcode")
-public abstract class Piece extends Area implements Cloneable {
+public abstract class Piece extends Area implements Comparable<Piece>, Cloneable {
    
     private static final Image WHITE_PAWN = ImageReader.readGIFImage("WhitePawn3D");
     private static final Image WHITE_KNIGHT = ImageReader.readGIFImage("WhiteKnight3D");
@@ -132,8 +132,12 @@ public abstract class Piece extends Area implements Cloneable {
         this.moves = moves;
     }
     
-    public final void incrementMoveCount() {
+    public final void increaseMoveCount() {
         ++moves;
+    }
+    
+    public final void decreaseMoveCount() {
+        --moves;
     }
     
     public final boolean hasMoved() {
@@ -208,6 +212,66 @@ public abstract class Piece extends Area implements Cloneable {
     public abstract List<Tile> getProtectedTiles(Grid grid);
 
     public abstract void setProtectedTiles(Grid grid);
+    
+    //method which only applies to Pawn, defined here
+    //to avoid the need for casting
+    public boolean justMadeDoubleJump() {
+        throw new UnsupportedOperationException();
+    }
+
+    //method which only applies to Pawn, defined here
+    //to avoid the need for casting
+    public void setJustMadeDoubleJump(boolean doubleJumpJustPerformed) {
+        throw new UnsupportedOperationException();
+    }
+    
+    //method which only applies to Pawn, defined here
+    //to avoid the need for casting
+    public Tile getLeftEnPassantTile(Grid grid) {
+        throw new UnsupportedOperationException();
+    }
+    
+    //method which only applies to Pawn, defined here
+    //to avoid the need for casting
+    public Tile getRightEnPassantTile(Grid grid) {
+        throw new UnsupportedOperationException();
+    }
+    
+    //method which only applies to Pawn, defined here
+    //to avoid the need for casting
+    public List<Tile> getEnPassantTiles(Grid grid) {
+        throw new UnsupportedOperationException();
+    }
+    
+    /**
+     * Compares this piece vs the given piece by their 
+     * exact value.
+     * @param other Another piece object.
+     * @return 
+     */
+    @Override
+    public final int compareTo(Piece other) {
+        return Integer.compare(getValue(), other.getValue());
+    }
+    
+    public final int getValue() {
+        if (isPawn()) {
+            return ChessConstants.PAWN_VALUE;
+        }
+        if (isKnight()) {
+            return ChessConstants.KNIGHT_VALUE;
+        }
+        if (isBishop()) {
+            return ChessConstants.BISHOP_VALUE;
+        }
+        if (isRook()){
+            return ChessConstants.ROOK_VALUE;
+        }
+        if (isQueen()) {
+            return ChessConstants.QUEEN_VALUE;
+        }
+        return ChessConstants.KING_VALUE;
+    }
 
     @Override
     public boolean equals(Object obj) {
@@ -236,24 +300,21 @@ public abstract class Piece extends Area implements Cloneable {
         return color ? ChessConstants.WHITE : ChessConstants.BLACK;
     }
 
-    /**
-     * Used for SEEN_POSITIONS in AI class
-     * @return 
-     */
-    public final String encode() {
+    public String encode() {
         return "(" + color + "," + getType() + "," + getRow() + "," + getColumn() + ")";
     }
     
-    public final String toEngineString() {
-        return getRow() + Constants.SPACE + getColumn() + Constants.SPACE + getMoveCount() + Constants.SPACE + isWhite() + Constants.SPACE + getType();
+    public String toEngineString() {
+        return getRow() + SPACE + getColumn() + SPACE + getMoveCount() + SPACE + isWhite() + SPACE + getType();
     }
     
     public static final Piece readEngineString(String str) {
-        String[] split = str.split(Constants.SPACE);
+        String[] split = str.split(SPACE);
         switch (split[4]) {
             case ChessConstants.PAWN: {
                 Pawn pawn = new Pawn(Integer.parseInt(split[0]), Integer.parseInt(split[1]), "true".equals(split[3]));
                 pawn.setMoveCount(Integer.parseInt(split[2]));
+                pawn.setJustMadeDoubleJump(Boolean.parseBoolean(split[5]));
                 return pawn;
             }
             case ChessConstants.KNIGHT: {
@@ -300,7 +361,7 @@ public abstract class Piece extends Area implements Cloneable {
      * @return Piece.toOutputString()
      */
     @Override
-    public String toString() {
+    public final String toString() {
         return toOutputString();
     }
 
@@ -318,6 +379,7 @@ public abstract class Piece extends Area implements Cloneable {
                 Pawn pawn = new Pawn(Integer.parseInt(data.get(4)), Integer.parseInt(data.get(5)), Boolean.parseBoolean(data.get(1)));
                 pawn.setSelected(Boolean.parseBoolean(data.get(2)));
                 pawn.setMoveCount(Integer.parseInt(data.get(3)));
+                pawn.setJustMadeDoubleJump(Boolean.parseBoolean(data.get(6)));
                 return pawn;
             }
             case ChessConstants.KNIGHT: {
@@ -357,9 +419,9 @@ public abstract class Piece extends Area implements Cloneable {
     private static List<String> parseData(String str) {
         final int length = str.length();
         List<String> list = new ArrayList<>();
+        StringBuilder data = new StringBuilder();
         for (int outer = 0; outer < length; ++outer) {
             if (str.charAt(outer) == '[') {
-                StringBuilder data = new StringBuilder();
                 for (int inner = outer + 1; inner < length;) {
                     if (str.charAt(inner) == ']') {
                         break;
@@ -368,6 +430,7 @@ public abstract class Piece extends Area implements Cloneable {
                 }
                 list.add(data.toString());
                 outer += data.length() + 1;
+                data.setLength(0);
             }
         }
         return list;

@@ -158,6 +158,10 @@ public final class Board extends JPanel implements Runnable {
             pieces.get(pieceIndex).setProtectedTiles(grid);
         }
 
+        for (int depth = 0; depth <= 5; ++depth) {
+            System.out.println("GUI Piece Perft(" + depth + "): " + Perft.perft(grid, depth, false));
+        }
+
         MouseTracker tracker = new MouseTracker();
         super.addMouseListener(tracker);
         super.addMouseMotionListener(tracker);
@@ -391,6 +395,7 @@ public final class Board extends JPanel implements Runnable {
 
         //Grid clonedGrid = new Grid(grid);
         //List<Piece> clonedPieces = Pieces.getDeepCopy(pieces);
+        
         if (turn) {
             switch (Pieces.getWhiteState(grid, pieces, Pieces.getWhiteKing(pieces))) {
                 case ChessConstants.CHECKED: {
@@ -600,31 +605,54 @@ public final class Board extends JPanel implements Runnable {
     }
 
     /**
-     * Method that should be called immediately after white finishes his/her
-     * turn. Any white pawns that could've performed en passant cannot do so at
-     * the conclusion of white's turn.
+     * Method that should be called immediately after White successfully
+     * finishes his/her turn. If a Black Pawn made a double jump just 
+     * before White's last turn, and has not been captured En Passant,
+     * it is now permanently immune from 
+     * being targeted by En Passant. 
+     * 
+     * @see checkBlackEnPassantRights()
      */
     private void checkWhiteEnPassantRights() {
-        for (int index = 0, size = pieces.size(); index != size; ++index) {
-            Piece piece = pieces.get(index);
-            if (piece.isPawn() && piece.isWhite()) {
-                Pawn whitePawn = (Pawn) piece;
-                if (!whitePawn.getEnPassantTiles(grid).isEmpty()) {
-                    whitePawn.setEnPassantPermission(false);
-                }
-            }
-        }
-    }
-
-    private void checkBlackEnPassantRights() {
+        int count = 0;
         for (int index = 0, size = pieces.size(); index != size; ++index) {
             Piece piece = pieces.get(index);
             if (piece.isPawn() && piece.isBlack()) {
-                Pawn blackPawn = (Pawn) piece;
-                if (!blackPawn.getEnPassantTiles(grid).isEmpty()) {
-                    blackPawn.setEnPassantPermission(false);
+                if (piece.justMadeDoubleJump()) {
+                    piece.setJustMadeDoubleJump(false);
+                    ++count;
                 }
             }
+        }
+        //this redundant check ensures that only 1 pawn is marked per move
+        if (count > 1) {
+            throw new Error();
+        }
+    }
+
+    /**
+     * Method that should be called immediately after Black successfully
+     * finishes his/her turn. If a White Pawn made a double jump just 
+     * before Black's last turn, and has not been captured
+     * En Passant, it is now permanently immune from 
+     * being targeted by En Passant. 
+     * 
+     * @see checkWhiteEnPassantRights()
+     */
+    private void checkBlackEnPassantRights() {
+        int count = 0;
+        for (int index = 0, size = pieces.size(); index != size; ++index) {
+            Piece piece = pieces.get(index);
+            if (piece.isPawn() && piece.isWhite()) {
+                if (piece.justMadeDoubleJump()) {
+                    piece.setJustMadeDoubleJump(false);
+                    ++count;
+                }
+            }
+        }
+        //this redundant check ensures that only 1 pawn is marked per move
+        if (count > 1) {
+            throw new Error();
         }
     }
 
@@ -657,6 +685,23 @@ public final class Board extends JPanel implements Runnable {
             if (gameMode == COMPUTER_VS_COMPUTER || !access || SwingUtilities.isRightMouseButton(me)) {
                 return;
             }
+
+            /* //checks that AI & GUI generate same number of moves from a position
+            {
+                int numPieces = pieces.size();
+                List<String> encoded = new ArrayList<>(numPieces);
+                for (int index = 0; index < numPieces; ++index) {
+                    encoded.add(pieces.get(index).toEngineString());
+                }
+                if (turn) {
+                    whiteComputer.makeMove(encoded);
+                }
+                else {
+                    blackComputer.makeMove(encoded);
+                }
+                System.out.println("Board: " + Perft.perft(grid, 1, !turn));
+            }
+             */
 
             Point mouse = me.getPoint();
             Piece chosen = Pieces.getSelected(pieces);
@@ -694,9 +739,9 @@ public final class Board extends JPanel implements Runnable {
                                 leftRookTile.removeOccupant();
                                 previousTile.removeOccupant();
                                 newLeftRookTile.setOccupant(leftRook);
-                                leftRook.incrementMoveCount();
+                                leftRook.increaseMoveCount();
                                 newLeftKingTile.setOccupant(chosen);
-                                chosen.incrementMoveCount();
+                                chosen.increaseMoveCount();
                                 if (turn) {
                                     whiteMoves.add("White King castles left from " + previousLocation + " to " + chosen.getNotationLocation() + " and the White Rook at [1,A] has moved to [1,D]");
                                 }
@@ -711,9 +756,9 @@ public final class Board extends JPanel implements Runnable {
                                 rightRookTile.removeOccupant();
                                 previousTile.removeOccupant();
                                 newRightRookTile.setOccupant(rightRook);
-                                rightRook.incrementMoveCount();
+                                rightRook.increaseMoveCount();
                                 newRightKingTile.setOccupant(chosen);
-                                chosen.incrementMoveCount();
+                                chosen.increaseMoveCount();
                                 if (turn) {
                                     whiteMoves.add("White King castles right from " + previousLocation + " to " + chosen.getNotationLocation() + " and the White Rook at [1,H] has moved to [1,F]");
                                 }
@@ -760,7 +805,7 @@ public final class Board extends JPanel implements Runnable {
                                             break OuterLoop;
                                         }
                                         whiteMoves.add("White Pawn at " + previousLocation + " performed enpassant capture on the Black Pawn at " + blackPawn.getNotationLocation() + " and has moved from " + previousLocation + " to " + chosen.getNotationLocation());
-                                        pawn.incrementMoveCount();
+                                        pawn.increaseMoveCount();
                                         validMove = true;
                                         break OuterLoop;
                                     }
@@ -793,7 +838,7 @@ public final class Board extends JPanel implements Runnable {
                                             break OuterLoop;
                                         }
                                         whiteMoves.add("White Pawn at " + previousLocation + " performed enpassant capture on the Black Pawn at " + blackPawn.getNotationLocation() + " and has moved from " + previousLocation + " to " + chosen.getNotationLocation());
-                                        pawn.incrementMoveCount();
+                                        pawn.increaseMoveCount();
                                         validMove = true;
                                         break OuterLoop;
                                     }
@@ -831,7 +876,7 @@ public final class Board extends JPanel implements Runnable {
                                             break OuterLoop;
                                         }
                                         blackMoves.add("Black Pawn at " + previousLocation + " performed enpassant capture on the White Pawn at " + whitePawn.getNotationLocation() + " and has moved from " + previousLocation + " to " + chosen.getNotationLocation());
-                                        pawn.incrementMoveCount();
+                                        pawn.increaseMoveCount();
                                         validMove = true;
                                         break OuterLoop;
                                     }
@@ -864,7 +909,7 @@ public final class Board extends JPanel implements Runnable {
                                             break OuterLoop;
                                         }
                                         blackMoves.add("Black Pawn at " + previousLocation + " performed enpassant capture on the White Pawn at " + whitePawn.getNotationLocation() + " and has moved from " + previousLocation + " to " + chosen.getNotationLocation());
-                                        pawn.incrementMoveCount();
+                                        pawn.increaseMoveCount();
                                         validMove = true;
                                         break OuterLoop;
                                     }
@@ -910,6 +955,25 @@ public final class Board extends JPanel implements Runnable {
                             boolean promoted = false;
                             Piece converted;
                             if (chosen.isPawn()) {
+
+                                //see if this pawn has made a double jump
+                                //this is for enpassant purposes
+                                if (!chosen.hasMoved()) {
+                                    if (chosen.isWhite()) {
+                                        //now check if the pawn has made a double jump
+                                        if (chosen.getRow() == 4) {
+                                            chosen.setJustMadeDoubleJump(true);
+                                            System.out.println(chosen + " has just made a double jump!");
+                                        }
+                                    }
+                                    else {
+                                        if (chosen.getRow() == 3) {
+                                            chosen.setJustMadeDoubleJump(true);
+                                            System.out.println(chosen + " has just made a double jump!");
+                                        }
+                                    }
+                                }
+
                                 if (chosen.isWhite() && chosen.getRow() == 0) {
                                     clearTint();
                                     String[] choices = {"White Knight", "White Bishop", "White Rook", "White Queen"};
@@ -955,7 +1019,7 @@ public final class Board extends JPanel implements Runnable {
                                     blackMoves.add(chosen.getName() + " at " + previousLocation + " has moved to " + chosen.getNotationLocation());
                                 }
                             }
-                            chosen.incrementMoveCount();
+                            chosen.increaseMoveCount();
                             validMove = true;
                             break;
                         }
@@ -1053,7 +1117,7 @@ public final class Board extends JPanel implements Runnable {
                                     blackMoves.add(chosen.getName() + " at " + previousLocation + " has captured " + killed.getName() + " at " + chosen.getNotationLocation());
                                 }
                             }
-                            chosen.incrementMoveCount();
+                            chosen.increaseMoveCount();
                             validMove = true;
                             break;
                         }
@@ -1070,14 +1134,12 @@ public final class Board extends JPanel implements Runnable {
                     pieces.get(index).setProtectedTiles(grid);
                 }
                 if (validMove) {
-                    /*
                     if (turn) {
                         checkWhiteEnPassantRights();
                     }
                     else {
                         checkBlackEnPassantRights();
                     }
-                     */
                     MOVE_SOUND.play(volume);
                     turn = !turn;
                     history.setData(whiteMoves, blackMoves);
