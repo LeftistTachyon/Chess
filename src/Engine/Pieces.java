@@ -205,6 +205,28 @@ final class Pieces {
         }
         return null;
     }
+    
+    public static Pawn checkWhiteEnPassantRightsFast(List<Pawn> blackPawns) {
+        for (int index = 0, size = blackPawns.size(); index != size; ++index) {
+            Pawn blackPawn = blackPawns.get(index);
+            if (blackPawn.justMadeDoubleJump()) {
+                blackPawn.setJustMadeDoubleJump(false);
+                return blackPawn;
+            }
+        }
+        return null;
+    }
+    
+    public static Pawn checkBlackEnPassantRightsFast(List<Pawn> whitePawns) {
+        for (int index = 0, size = whitePawns.size(); index != size; ++index) {
+            Pawn whitePawn = whitePawns.get(index);
+            if (whitePawn.justMadeDoubleJump()) {
+                whitePawn.setJustMadeDoubleJump(false);
+                return whitePawn;
+            }
+        }
+        return null;
+    }
 
     private static final StringBuilder ENCODER = new StringBuilder(100);
 

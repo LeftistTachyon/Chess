@@ -22,16 +22,20 @@ final class Tester {
     private Tester() {
 
     }
-
-    static final void check(Grid grid1, Grid grid2, List<Piece> list1, List<Piece> list2) {
+    
+    static final void checkGrids(Grid grid1, Grid grid2) {
         grid1.equals(grid2);
-        comparePieces(list1, list2);
     }
     
-    private static void comparePieces(List<Piece> list1, List<Piece> list2) {
+    static final void checkPieces(List<Piece> list1, List<Piece> list2) {
         if (!list1.equals(list2)) {
             throw new Error();
         }
+    }
+
+    static final void check(Grid grid1, Grid grid2, List<Piece> list1, List<Piece> list2) {
+        checkGrids(grid1, grid2);
+        checkPieces(list1, list2);
     }
 
     public static final void main(String... args) {
@@ -253,8 +257,16 @@ final class Tester {
         Grid copiedGrid = new Grid(grid);
         List<Piece> copiedPieces = Pieces.getDeepCopy(pieces);
         for (int depth = 1; depth <= 7; ++depth) {
-            System.out.println("Perft (" + depth + "): " + perft(grid, depth, color));
+            if (!color) {
+                SecureMinMaxBlack.min(new Board(grid), depth);
+            }
+            else {
+                SecureMinMaxBlack.max(new Board(grid), depth);
+            }
+            System.out.println("SecureMinMax " + (!color ? "White" : "Black") + " Perft(" + depth + ") Result: " + SecureMinMaxBlack.getPerftCounter());
+            SecureMinMaxBlack.setPerftCounter(0);
         }
+       
         check(grid, copiedGrid, pieces, copiedPieces);
         System.out.println();
     }

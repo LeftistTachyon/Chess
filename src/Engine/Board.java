@@ -4,6 +4,11 @@ import Util.ChessConstants;
 import java.util.ArrayList;
 import java.util.List;
 
+//BE CAREFUL WHEN REMOVING PIECES FROM 1 LIST
+//IT WILL STILL BE IN ANOTHER LIST
+//FOR EXAMPLE: IF YOU REMOVE A BLACK PAWN FROM 
+//THE BLACK PIECES LIST IT WILL STILL
+//BE IN THE BLACK PAWN LIST
 public final class Board {
 
     final Grid grid;
