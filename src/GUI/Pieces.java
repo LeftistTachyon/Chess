@@ -69,9 +69,13 @@ public final class Pieces {
      * @return The index of the given piece in the given list of pieces.
      */
     static int remove(List<Piece> pieces, Piece piece) {
-        int index = pieces.lastIndexOf(piece); //starting from the least valuable pieces
-        pieces.remove(index);
-        return index;
+        for (int index = (pieces.size() - 1); index >= 0; --index) {
+            if (piece.equals(pieces.get(index))) {
+                pieces.remove(index);
+                return index; 
+            }
+        }
+        return -1;
     }
 
     /**

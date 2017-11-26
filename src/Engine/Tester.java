@@ -8,8 +8,11 @@ import static Util.Constants.POSITIVE_INFINITY;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.regex.Pattern;
 
 final class Tester {
+    
+    private static final int MAX_DEPTH = 5;
 
     @SuppressWarnings("Convert2Lambda")
     private static final Comparator<Tile> TILE_SORTER = new Comparator<Tile>() {
@@ -37,7 +40,7 @@ final class Tester {
         checkGrids(grid1, grid2);
         checkPieces(list1, list2);
     }
-
+    
     public static final void main(String... args) {
         String s = "type anything here";
         s = s.replace("white", "black");
@@ -45,11 +48,10 @@ final class Tester {
         s = s.replace("White", "Black");
         System.out.println(s);
         
-        System.out.println("Num processors: " + Constants.RUNTIME.availableProcessors());
+        System.out.println("Number of Processors: " + Constants.RUNTIME.availableProcessors());
         System.out.println();
         
-        int k = 0;
-        while (k++ < 10) {
+        for (int times = 10; times >= 0; --times) {
             int[] first = new int[10000000];
             int[] second = new int[10000000];
             long start = System.nanoTime();
@@ -67,14 +69,63 @@ final class Tester {
             System.out.println();
         }
         
+        {
+            AI.TIMER = new SearchTimer(10000, "Test");
+            new AI(true, 60).useTestDialog();
+        }
+
         testStartPosition();
         testErrorPosition();
+        
+        //position 5 at https://chessprogramming.wikispaces.com/Perft+Results
+        {
+            List<Piece> pieces = new ArrayList<>();
+            pieces.add(new Rook(0, 0, false));
+            pieces.add(new Knight(0, 1, false));
+            pieces.add(new Bishop(0, 2, false));
+            pieces.add(new Queen(0, 3, false));
+            pieces.add(new King(0, 5, false));
+            pieces.get(4).increaseMoveCount();
+            pieces.add(new Rook(0, 7, false));
+
+            pieces.add(new Pawn(1, 0, false));
+            pieces.add(new Pawn(1, 1, false));
+            Pawn aboutToBePromoted = new Pawn(1, 3, true);
+            aboutToBePromoted.increaseMoveCount();
+            pieces.add(aboutToBePromoted);
+            pieces.add(new Bishop(1, 4, false));
+            pieces.add(new Pawn(1, 5, false));
+            pieces.add(new Pawn(1, 6, false));
+            pieces.add(new Pawn(1, 7, false));
+
+            Pawn blackPawnMovedOneTileDown = new Pawn(2, 2, false);
+            blackPawnMovedOneTileDown.increaseMoveCount();
+            pieces.add(blackPawnMovedOneTileDown);
+
+            pieces.add(new Bishop(4, 2, true));
+
+            pieces.add(new Pawn(6, 0, true));
+            pieces.add(new Pawn(6, 1, true));
+            pieces.add(new Pawn(6, 2, true));
+            pieces.add(new Knight(6, 4, true));
+            pieces.add(new Knight(6, 5, false));
+            pieces.add(new Pawn(6, 6, true));
+            pieces.add(new Pawn(6, 7, true));
+
+            pieces.add(new Rook(7, 0, true));
+            pieces.add(new Knight(7, 1, true));
+            pieces.add(new Bishop(7, 2, true));
+            pieces.add(new Queen(7, 3, true));
+            pieces.add(new King(7, 4, true));
+            pieces.add(new Rook(7, 7, true));
+
+            testPosition(pieces, false);
+        }
     }
 
     private static void testStartPosition() {
         System.out.println("Testing Starting Position");
-        AI.TIMER = new SearchTimer(10000, "Test");
-        new AI(true, 60).useTestDialog();
+
         List<Piece> pieces = new ArrayList<>();
 
         pieces.add(new King(7, 4, true));
@@ -125,7 +176,7 @@ final class Tester {
         grid.setProtections(pieces);
         List<Piece> whites = Pieces.getWhite(pieces);
         List<Piece> blacks = Pieces.getBlack(pieces);
-        for (int depth = 1; depth <= 5; ++depth) {
+        for (int depth = 1; depth <= MAX_DEPTH; ++depth) {
             int alphaBetaScore = AlphaBetaWhite.min(grid, whites, blacks, depth, NEGATIVE_INFINITY, POSITIVE_INFINITY);
             int alphaBetaPositionCount = Evaluator.getNumberOfPositionsEvaluatedInWhitePersepective();
             System.out.println("AlphaBeta Score: " + alphaBetaScore);
@@ -186,7 +237,7 @@ final class Tester {
         grid.setProtections(pieces);
         List<Piece> whites = Pieces.getWhite(pieces);
         List<Piece> blacks = Pieces.getBlack(pieces);
-        for (int depth = 1; depth <= 7; ++depth) {
+        for (int depth = 1; depth <= MAX_DEPTH; ++depth) {
             int alphaBetaScore = AlphaBetaWhite.min(grid, whites, blacks, depth, NEGATIVE_INFINITY, POSITIVE_INFINITY);
             int alphaBetaPositionCount = Evaluator.getNumberOfPositionsEvaluatedInWhitePersepective();
             System.out.println("AlphaBeta Score: " + alphaBetaScore);
@@ -256,15 +307,8 @@ final class Tester {
         
         Grid copiedGrid = new Grid(grid);
         List<Piece> copiedPieces = Pieces.getDeepCopy(pieces);
-        for (int depth = 1; depth <= 7; ++depth) {
-            if (!color) {
-                SecureMinMaxBlack.min(new Board(grid), depth);
-            }
-            else {
-                SecureMinMaxBlack.max(new Board(grid), depth);
-            }
-            System.out.println("SecureMinMax " + (!color ? "White" : "Black") + " Perft(" + depth + ") Result: " + SecureMinMaxBlack.getPerftCounter());
-            SecureMinMaxBlack.setPerftCounter(0);
+        for (int depth = 1; depth <= MAX_DEPTH; ++depth) {
+            System.out.println((!color ? "White" : "Black") + " Perft(" + depth + ") Result: " + perft(grid, depth, color));
         }
        
         check(grid, copiedGrid, pieces, copiedPieces);
@@ -375,11 +419,11 @@ final class Tester {
      */
     static final long perft(final Grid grid, int depth, final boolean color) {
         if (depth == 0) {
-            return 1;
+            return 1L;
         }
 
         --depth;
-        long moves = 0;
+        long moves = 0L;
 
         final List<Piece> pieces = grid.getPieces();
         Pieces.sort(pieces);
@@ -470,29 +514,32 @@ final class Tester {
                         System.out.println("Enemy King targeted!");
                         continue;
                     }
-                    previousTile.removeOccupant();
                     if (black.isPawn() && previousRow == 6) {
-                        Queen replace = Pawn.promote(black);
-                        attackTile.setOccupant(replace);
-                        int pawnIndex = pieces.indexOf(black);
-                        pieces.set(pawnIndex, replace);
-                        int removeIndex = Pieces.remove(pieces, enemy);
-                        grid.setProtections(pieces);
-                        if (!blackKing.inCheck(grid)) {
-                            replace.increaseMoveCount();
-                            Piece pawn = checkBlackEnPassantRights(pieces);
-                            moves += perft(grid, depth, !color);
-                            if (pawn != null) {
-                                pawn.setJustMadeDoubleJump(true);
+                        //Queen replace = Pawn.promote(black);
+                        for (Piece replace : Pawn.getPromoted(black)) {
+                            previousTile.removeOccupant();
+                            attackTile.setOccupant(replace);
+                            int pawnIndex = pieces.indexOf(black);
+                            pieces.set(pawnIndex, replace);
+                            int removeIndex = Pieces.remove(pieces, enemy);
+                            grid.setProtections(pieces);
+                            if (!blackKing.inCheck(grid)) {
+                                replace.increaseMoveCount();
+                                Piece pawn = checkBlackEnPassantRights(pieces);
+                                moves += perft(grid, depth, !color);
+                                if (pawn != null) {
+                                    pawn.setJustMadeDoubleJump(true);
+                                }
                             }
+                            previousTile.setOccupant(black);
+                            attackTile.setOccupant(enemy);
+                            pieces.add(removeIndex, enemy);
+                            pieces.set(pawnIndex, black);
+                            grid.setProtections(pieces);
                         }
-                        previousTile.setOccupant(black);
-                        attackTile.setOccupant(enemy);
-                        pieces.add(removeIndex, enemy);
-                        pieces.set(pawnIndex, black);
-                        grid.setProtections(pieces);
                     }
                     else {
+                        previousTile.removeOccupant();
                         attackTile.setOccupant(black);
                         int removeIndex = Pieces.remove(pieces, enemy);
                         grid.setProtections(pieces);
@@ -577,27 +624,30 @@ final class Tester {
                 List<Tile> moveTiles = black.getMoveTiles(grid);
                 for (int index = (moveTiles.size() - 1); index >= 0; --index) {
                     Tile moveTile = moveTiles.get(index);
-                    previousTile.removeOccupant();
                     if (black.isPawn() && previousRow == 6) {
-                        Queen replace = Pawn.promote(black);
-                        moveTile.setOccupant(replace);
-                        int pawnIndex = pieces.indexOf(black);
-                        pieces.set(pawnIndex, replace);
-                        grid.setProtections(pieces);
-                        if (!blackKing.inCheck(grid)) {
-                            replace.increaseMoveCount();
-                            Piece pawn = checkBlackEnPassantRights(pieces);
-                            moves += perft(grid, depth, !color);
-                            if (pawn != null) {
-                                pawn.setJustMadeDoubleJump(true);
+                        //Queen replace = Pawn.promote(black);
+                        for (Piece replace : Pawn.getPromoted(black)) {
+                            previousTile.removeOccupant();
+                            moveTile.setOccupant(replace);
+                            int pawnIndex = pieces.indexOf(black);
+                            pieces.set(pawnIndex, replace);
+                            grid.setProtections(pieces);
+                            if (!blackKing.inCheck(grid)) {
+                                replace.increaseMoveCount();
+                                Piece pawn = checkBlackEnPassantRights(pieces);
+                                moves += perft(grid, depth, !color);
+                                if (pawn != null) {
+                                    pawn.setJustMadeDoubleJump(true);
+                                }
                             }
+                            previousTile.setOccupant(black);
+                            moveTile.removeOccupant();
+                            pieces.set(pawnIndex, black);
+                            grid.setProtections(pieces);
                         }
-                        previousTile.setOccupant(black);
-                        moveTile.removeOccupant();
-                        pieces.set(pawnIndex, black);
-                        grid.setProtections(pieces);
                     }
                     else {
+                        previousTile.removeOccupant();
                         moveTile.setOccupant(black);
                         grid.setProtections(pieces);
                         if (!blackKing.inCheck(grid)) {
@@ -711,29 +761,32 @@ final class Tester {
                         System.out.println("Enemy King targeted!");
                         continue;
                     }
-                    previousTile.removeOccupant();
                     if (white.isPawn() && previousRow == 1) {
-                        Queen replace = Pawn.promote(white);
-                        attackTile.setOccupant(replace);
-                        int pawnIndex = pieces.indexOf(white);
-                        pieces.set(pawnIndex, replace);
-                        int removeIndex = Pieces.remove(pieces, enemy);
-                        grid.setProtections(pieces);
-                        if (!whiteKing.inCheck(grid)) {
-                            replace.increaseMoveCount();
-                            Piece pawn = checkWhiteEnPassantRights(pieces);
-                            moves += perft(grid, depth, !color);
-                            if (pawn != null) {
-                                pawn.setJustMadeDoubleJump(true);
+                        //Queen replace = Pawn.promote(white);
+                        for (Piece replace : Pawn.getPromoted(white)) {
+                            previousTile.removeOccupant();
+                            attackTile.setOccupant(replace);
+                            int pawnIndex = pieces.indexOf(white);
+                            pieces.set(pawnIndex, replace);
+                            int removeIndex = Pieces.remove(pieces, enemy);
+                            grid.setProtections(pieces);
+                            if (!whiteKing.inCheck(grid)) {
+                                replace.increaseMoveCount();
+                                Piece pawn = checkWhiteEnPassantRights(pieces);
+                                moves += perft(grid, depth, !color);
+                                if (pawn != null) {
+                                    pawn.setJustMadeDoubleJump(true);
+                                }
                             }
+                            previousTile.setOccupant(white);
+                            attackTile.setOccupant(enemy);
+                            pieces.add(removeIndex, enemy);
+                            pieces.set(pawnIndex, white);
+                            grid.setProtections(pieces);
                         }
-                        previousTile.setOccupant(white);
-                        attackTile.setOccupant(enemy);
-                        pieces.add(removeIndex, enemy);
-                        pieces.set(pawnIndex, white);
-                        grid.setProtections(pieces);
                     }
                     else {
+                        previousTile.removeOccupant();
                         attackTile.setOccupant(white);
                         int removeIndex = Pieces.remove(pieces, enemy);
                         grid.setProtections(pieces);
@@ -817,27 +870,30 @@ final class Tester {
                 List<Tile> moveTiles = white.getMoveTiles(grid);
                 for (int index = (moveTiles.size() - 1); index >= 0; --index) {
                     Tile moveTile = moveTiles.get(index);
-                    previousTile.removeOccupant();
                     if (white.isPawn() && previousRow == 1) {
-                        Queen replace = Pawn.promote(white);
-                        moveTile.setOccupant(replace);
-                        int pawnIndex = pieces.indexOf(white);
-                        pieces.set(pawnIndex, replace);
-                        grid.setProtections(pieces);
-                        if (!whiteKing.inCheck(grid)) {
-                            replace.increaseMoveCount();
-                            Piece pawn = checkWhiteEnPassantRights(pieces);
-                            moves += perft(grid, depth, !color);
-                            if (pawn != null) {
-                                pawn.setJustMadeDoubleJump(true);
+                        //Queen replace = Pawn.promote(white);
+                        for (Piece replace : Pawn.getPromoted(white)) {
+                            previousTile.removeOccupant();
+                            moveTile.setOccupant(replace);
+                            int pawnIndex = pieces.indexOf(white);
+                            pieces.set(pawnIndex, replace);
+                            grid.setProtections(pieces);
+                            if (!whiteKing.inCheck(grid)) {
+                                replace.increaseMoveCount();
+                                Piece pawn = checkWhiteEnPassantRights(pieces);
+                                moves += perft(grid, depth, !color);
+                                if (pawn != null) {
+                                    pawn.setJustMadeDoubleJump(true);
+                                }
                             }
+                            previousTile.setOccupant(white);
+                            moveTile.removeOccupant();
+                            pieces.set(pawnIndex, white);
+                            grid.setProtections(pieces);
                         }
-                        previousTile.setOccupant(white);
-                        moveTile.removeOccupant();
-                        pieces.set(pawnIndex, white);
-                        grid.setProtections(pieces);
                     }
                     else {
+                        previousTile.removeOccupant();
                         moveTile.setOccupant(white);
                         grid.setProtections(pieces);
                         if (!whiteKing.inCheck(grid)) {
@@ -868,5 +924,90 @@ final class Tester {
             Tester.check(grid, clonedGrid, pieces, clonedPieces);
             return moves;
         }
+    }
+    
+    //will not work since we dont read piece movecounts
+    //which is important for enpassant and castling and other stuff
+    @Deprecated
+    public static Grid readGrid(String line) {
+        Grid grid = new Grid();
+        String[] split = line.split(Pattern.quote("/"));
+        for (int index = 0; index < split.length; ++index) {
+            String original = split[index];
+            String formatted = "";
+            for (int outer = 0, length = original.length(); outer != length; ++outer) {
+                if (Character.isDigit(original.charAt(outer))) {
+                    int spaces = Integer.parseInt(original.substring(outer, outer + 1));
+                    while (spaces-- > 0) {
+                        formatted += " ";
+                    }
+                }
+                else {
+                    formatted += original.substring(outer, outer + 1);
+                }
+            }
+            split[index] = formatted;
+        }
+        int gridIndex = 0;
+        for (String each : split) {
+            for (char current : each.toCharArray()) {
+                if (Character.isLetter(current)) {
+                    switch (current) {
+                        case 'K': {
+                            grid.getTile(gridIndex).setOccupant(new King(0, 0, true));
+                            break;
+                        }
+                        case 'Q': {
+                            grid.getTile(gridIndex).setOccupant(new Queen(0, 0, true));
+                            break;
+                        }
+                        case 'R': {
+                            grid.getTile(gridIndex).setOccupant(new Rook(0, 0, true));
+                            break;
+                        }
+                        case 'B': {
+                            grid.getTile(gridIndex).setOccupant(new Bishop(0, 0, true));
+                            break;
+                        }
+                        case 'N': {
+                            grid.getTile(gridIndex).setOccupant(new Knight(0, 0, true));
+                            break;
+                        }
+                        case 'P': {
+                            grid.getTile(gridIndex).setOccupant(new Pawn(0, 0, true));
+                            break;
+                        }
+                    
+                        case 'k': {
+                            grid.getTile(gridIndex).setOccupant(new King(0, 0, !true));
+                            break;
+                        }
+                        case 'q': {
+                            grid.getTile(gridIndex).setOccupant(new Queen(0, 0, !true));
+                            break;
+                        }
+                        case 'r': {
+                            grid.getTile(gridIndex).setOccupant(new Rook(0, 0, !true));
+                            break;
+                        }
+                        case 'b': {
+                            grid.getTile(gridIndex).setOccupant(new Bishop(0, 0, !true));
+                            break;
+                        }
+                        case 'n': {
+                            grid.getTile(gridIndex).setOccupant(new Knight(0, 0, !true));
+                            break;
+                        }
+                        case 'p': {
+                            grid.getTile(gridIndex).setOccupant(new Pawn(0, 0, !true));
+                            break;
+                        }
+                    }
+                }
+                ++gridIndex;
+            }
+        }
+        grid.setProtections(grid.getPieces());
+        return grid;
     }
 }

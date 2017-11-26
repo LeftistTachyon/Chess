@@ -1,7 +1,6 @@
 package GUI;
 
 import Util.ChessConstants;
-import static Util.ChessConstants.QUEEN;
 import java.util.List;
 
 public final class Perft {
@@ -174,29 +173,32 @@ public final class Perft {
                         System.out.println("Enemy King targeted!");
                         continue;
                     }
-                    previousTile.removeOccupant();
                     if (black.isPawn() && previousRow == 6) {
-                        Piece replace = ((Pawn) black).promote(QUEEN);
-                        attackTile.setOccupant(replace);
-                        int pawnIndex = pieces.indexOf(black);
-                        pieces.set(pawnIndex, replace);
-                        int removeIndex = Pieces.remove(pieces, enemy);
-                        grid.setProtections(pieces);
-                        if (!blackKing.inCheck(grid)) {
-                            replace.increaseMoveCount();
-                            Piece pawn = checkBlackEnPassantRights(pieces);
-                            moves += perft(grid, depth, !color);
-                            if (pawn != null) {
-                                pawn.setJustMadeDoubleJump(true);
+                        //Piece replace = ((Pawn) black).promote(QUEEN);
+                        for (Piece replace : Pawn.getPromoted(black)) {
+                            previousTile.removeOccupant();
+                            attackTile.setOccupant(replace);
+                            int pawnIndex = pieces.indexOf(black);
+                            pieces.set(pawnIndex, replace);
+                            int removeIndex = Pieces.remove(pieces, enemy);
+                            grid.setProtections(pieces);
+                            if (!blackKing.inCheck(grid)) {
+                                replace.increaseMoveCount();
+                                Piece pawn = checkBlackEnPassantRights(pieces);
+                                moves += perft(grid, depth, !color);
+                                if (pawn != null) {
+                                    pawn.setJustMadeDoubleJump(true);
+                                }
                             }
+                            previousTile.setOccupant(black);
+                            attackTile.setOccupant(enemy);
+                            pieces.add(removeIndex, enemy);
+                            pieces.set(pawnIndex, black);
+                            grid.setProtections(pieces);
                         }
-                        previousTile.setOccupant(black);
-                        attackTile.setOccupant(enemy);
-                        pieces.add(removeIndex, enemy);
-                        pieces.set(pawnIndex, black);
-                        grid.setProtections(pieces);
                     }
                     else {
+                        previousTile.removeOccupant();
                         attackTile.setOccupant(black);
                         int removeIndex = Pieces.remove(pieces, enemy);
                         grid.setProtections(pieces);
@@ -281,27 +283,30 @@ public final class Perft {
                 List<Tile> moveTiles = black.getMoveTiles(grid);
                 for (int index = (moveTiles.size() - 1); index >= 0; --index) {
                     Tile moveTile = moveTiles.get(index);
-                    previousTile.removeOccupant();
                     if (black.isPawn() && previousRow == 6) {
-                        Piece replace = ((Pawn) black).promote(QUEEN);
-                        moveTile.setOccupant(replace);
-                        int pawnIndex = pieces.indexOf(black);
-                        pieces.set(pawnIndex, replace);
-                        grid.setProtections(pieces);
-                        if (!blackKing.inCheck(grid)) {
-                            replace.increaseMoveCount();
-                            Piece pawn = checkBlackEnPassantRights(pieces);
-                            moves += perft(grid, depth, !color);
-                            if (pawn != null) {
-                                pawn.setJustMadeDoubleJump(true);
+                        //Piece replace = ((Pawn) black).promote(QUEEN);
+                        for (Piece replace : Pawn.getPromoted(black)) {
+                            previousTile.removeOccupant();
+                            moveTile.setOccupant(replace);
+                            int pawnIndex = pieces.indexOf(black);
+                            pieces.set(pawnIndex, replace);
+                            grid.setProtections(pieces);
+                            if (!blackKing.inCheck(grid)) {
+                                replace.increaseMoveCount();
+                                Piece pawn = checkBlackEnPassantRights(pieces);
+                                moves += perft(grid, depth, !color);
+                                if (pawn != null) {
+                                    pawn.setJustMadeDoubleJump(true);
+                                }
                             }
+                            previousTile.setOccupant(black);
+                            moveTile.removeOccupant();
+                            pieces.set(pawnIndex, black);
+                            grid.setProtections(pieces);
                         }
-                        previousTile.setOccupant(black);
-                        moveTile.removeOccupant();
-                        pieces.set(pawnIndex, black);
-                        grid.setProtections(pieces);
                     }
                     else {
+                        previousTile.removeOccupant();
                         moveTile.setOccupant(black);
                         grid.setProtections(pieces);
                         if (!blackKing.inCheck(grid)) {
@@ -415,29 +420,32 @@ public final class Perft {
                         System.out.println("Enemy King targeted!");
                         continue;
                     }
-                    previousTile.removeOccupant();
                     if (white.isPawn() && previousRow == 1) {
-                        Piece replace = ((Pawn) white).promote(QUEEN);
-                        attackTile.setOccupant(replace);
-                        int pawnIndex = pieces.indexOf(white);
-                        pieces.set(pawnIndex, replace);
-                        int removeIndex = Pieces.remove(pieces, enemy);
-                        grid.setProtections(pieces);
-                        if (!whiteKing.inCheck(grid)) {
-                            replace.increaseMoveCount();
-                            Piece pawn = checkWhiteEnPassantRights(pieces);
-                            moves += perft(grid, depth, !color);
-                            if (pawn != null) {
-                                pawn.setJustMadeDoubleJump(true);
+                        //Piece replace = ((Pawn) white).promote(QUEEN);
+                        for (Piece replace : Pawn.getPromoted(white)) {
+                            previousTile.removeOccupant();
+                            attackTile.setOccupant(replace);
+                            int pawnIndex = pieces.indexOf(white);
+                            pieces.set(pawnIndex, replace);
+                            int removeIndex = Pieces.remove(pieces, enemy);
+                            grid.setProtections(pieces);
+                            if (!whiteKing.inCheck(grid)) {
+                                replace.increaseMoveCount();
+                                Piece pawn = checkWhiteEnPassantRights(pieces);
+                                moves += perft(grid, depth, !color);
+                                if (pawn != null) {
+                                    pawn.setJustMadeDoubleJump(true);
+                                }
                             }
+                            previousTile.setOccupant(white);
+                            attackTile.setOccupant(enemy);
+                            pieces.add(removeIndex, enemy);
+                            pieces.set(pawnIndex, white);
+                            grid.setProtections(pieces);
                         }
-                        previousTile.setOccupant(white);
-                        attackTile.setOccupant(enemy);
-                        pieces.add(removeIndex, enemy);
-                        pieces.set(pawnIndex, white);
-                        grid.setProtections(pieces);
                     }
                     else {
+                        previousTile.removeOccupant();
                         attackTile.setOccupant(white);
                         int removeIndex = Pieces.remove(pieces, enemy);
                         grid.setProtections(pieces);
@@ -521,27 +529,30 @@ public final class Perft {
                 List<Tile> moveTiles = white.getMoveTiles(grid);
                 for (int index = (moveTiles.size() - 1); index >= 0; --index) {
                     Tile moveTile = moveTiles.get(index);
-                    previousTile.removeOccupant();
                     if (white.isPawn() && previousRow == 1) {
-                        Piece replace = ((Pawn) white).promote(QUEEN);
-                        moveTile.setOccupant(replace);
-                        int pawnIndex = pieces.indexOf(white);
-                        pieces.set(pawnIndex, replace);
-                        grid.setProtections(pieces);
-                        if (!whiteKing.inCheck(grid)) {
-                            replace.increaseMoveCount();
-                            Piece pawn = checkWhiteEnPassantRights(pieces);
-                            moves += perft(grid, depth, !color);
-                            if (pawn != null) {
-                                pawn.setJustMadeDoubleJump(true);
+                        //Piece replace = ((Pawn) white).promote(QUEEN);
+                        for (Piece replace : Pawn.getPromoted(white)) {
+                            previousTile.removeOccupant();
+                            moveTile.setOccupant(replace);
+                            int pawnIndex = pieces.indexOf(white);
+                            pieces.set(pawnIndex, replace);
+                            grid.setProtections(pieces);
+                            if (!whiteKing.inCheck(grid)) {
+                                replace.increaseMoveCount();
+                                Piece pawn = checkWhiteEnPassantRights(pieces);
+                                moves += perft(grid, depth, !color);
+                                if (pawn != null) {
+                                    pawn.setJustMadeDoubleJump(true);
+                                }
                             }
+                            previousTile.setOccupant(white);
+                            moveTile.removeOccupant();
+                            pieces.set(pawnIndex, white);
+                            grid.setProtections(pieces);
                         }
-                        previousTile.setOccupant(white);
-                        moveTile.removeOccupant();
-                        pieces.set(pawnIndex, white);
-                        grid.setProtections(pieces);
                     }
                     else {
+                        previousTile.removeOccupant();
                         moveTile.setOccupant(white);
                         grid.setProtections(pieces);
                         if (!whiteKing.inCheck(grid)) {

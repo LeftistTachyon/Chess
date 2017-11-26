@@ -42,6 +42,8 @@ import javax.swing.SwingUtilities;
 //before enabling protections, othewise we will
 //have a board with improper protected tiles
 public final class Board extends JPanel implements Runnable {
+    
+    private static final boolean PERFT_START = false;
 
     //game states
     public static final int LOCAL = 0;
@@ -158,8 +160,10 @@ public final class Board extends JPanel implements Runnable {
             pieces.get(pieceIndex).setProtectedTiles(grid);
         }
 
-        for (int depth = 0; depth <= 5; ++depth) {
-            System.out.println("GUI Piece Perft(" + depth + "): " + Perft.perft(grid, depth, false));
+        if (PERFT_START) {
+            for (int depth = 0; depth <= 5; ++depth) {
+                System.out.println("GUI Piece Perft(" + depth + "): " + Perft.perft(grid, depth, false));
+            }
         }
 
         MouseTracker tracker = new MouseTracker();
@@ -289,53 +293,102 @@ public final class Board extends JPanel implements Runnable {
         pieces.add(new Pawn(1, 6, false));
         pieces.add(new Pawn(1, 7, false));
 
-        /*
-        pieces.clear();
+        //endgame enpassant victory, probubly buggy, check movecounts
+        {
+            pieces.clear();
+
+            pieces.add(new Rook(0, 0, 0, 0, 0, 2, true));
+            pieces.add(new Rook(0, 0, 0, 0, 0, 6, true));
+            pieces.add(new King(0, 0, 0, 0, 1, 7, false));
+
+            pieces.add(new Pawn(0, 0, 0, 0, 2, 7, false));
+            pieces.add(new Pawn(0, 0, 0, 0, 2, 0, false));
+            pieces.add(new Pawn(0, 0, 0, 0, 3, 6, false));
+            pieces.add(new Pawn(0, 0, 0, 0, 3, 7, true));
+            pieces.add(new King(0, 0, 0, 0, 6, 7, true));
+        }
         
-        pieces.add(new Rook(0, 0, 0, 0, 0, 2, true));
-        pieces.add(new Rook(0, 0, 0, 0, 0, 6, true));
-        pieces.add(new King(0, 0, 0, 0, 1, 7, false));
+        //former error position
+        {
+            pieces.clear();
+
+            pieces.add(new Rook(0, 0, false));
+            pieces.add(new Bishop(0, 2, false));
+            pieces.add(new Queen(0, 3, false));
+            pieces.add(new King(0, 4, false));
+            pieces.add(new Bishop(0, 5, false));
+            pieces.add(new Knight(0, 6, false));
+            pieces.add(new Rook(0, 7, false));
+            pieces.add(new Pawn(1, 0, false));
+            pieces.add(new Pawn(1, 1, false));
+            pieces.add(new Pawn(1, 2, false));
+            pieces.add(new Pawn(1, 3, false));
+            pieces.add(new Pawn(1, 5, false));
+            pieces.add(new Pawn(1, 6, false));
+            pieces.add(new Pawn(1, 7, false));
+            pieces.add(new Knight(2, 2, false));
+            pieces.add(new Pawn(3, 4, false));
+            pieces.add(new Pawn(4, 4, true));
+            pieces.add(new Pawn(5, 3, true));
+            pieces.add(new Pawn(6, 0, true));
+            pieces.add(new Pawn(6, 1, true));
+            pieces.add(new Pawn(6, 2, true));
+            pieces.add(new King(6, 4, true));
+            pieces.add(new Pawn(6, 5, true));
+            pieces.add(new Pawn(6, 6, true));
+            pieces.add(new Pawn(6, 7, true));
+            pieces.add(new Rook(7, 0, true));
+            pieces.add(new Knight(7, 1, true));
+            pieces.add(new Bishop(7, 2, true));
+            pieces.add(new Queen(7, 3, true));
+            pieces.add(new Knight(7, 6, true));
+            pieces.add(new Rook(7, 7, true));
+        }
         
-        pieces.add(new Pawn(0, 0, 0, 0, 2, 7, false));
-        pieces.add(new Pawn(0, 0, 0, 0, 2, 0, false));
-        pieces.add(new Pawn(0, 0, 0, 0, 3, 6, false));
-        pieces.add(new Pawn(0, 0, 0, 0, 3, 7, true));
-        pieces.add(new King(0, 0, 0, 0, 6, 7, true));
-        
-        pieces.clear();
-        
-        pieces.add(new Rook(0, 0, false));
-        pieces.add(new Bishop(0, 2, false));
-        pieces.add(new Queen(0, 3, false));
-        pieces.add(new King(0, 4, false));
-        pieces.add(new Bishop(0, 5, false));
-        pieces.add(new Knight(0, 6, false));
-        pieces.add(new Rook(0, 7, false));
-        pieces.add(new Pawn(1, 0, false));
-        pieces.add(new Pawn(1, 1, false));
-        pieces.add(new Pawn(1, 2, false));
-        pieces.add(new Pawn(1, 3, false));
-        pieces.add(new Pawn(1, 5, false));
-        pieces.add(new Pawn(1, 6, false));
-        pieces.add(new Pawn(1, 7, false));
-        pieces.add(new Knight(2, 2, false));
-        pieces.add(new Pawn(3, 4, false));
-        pieces.add(new Pawn(4, 4, true));
-        pieces.add(new Pawn(5, 3, true));
-        pieces.add(new Pawn(6, 0, true));
-        pieces.add(new Pawn(6, 1, true));
-        pieces.add(new Pawn(6, 2, true));
-        pieces.add(new King(6, 4, true));
-        pieces.add(new Pawn(6, 5, true));
-        pieces.add(new Pawn(6, 6, true));
-        pieces.add(new Pawn(6, 7, true));
-        pieces.add(new Rook(7, 0, true));
-        pieces.add(new Knight(7, 1, true));
-        pieces.add(new Bishop(7, 2, true));
-        pieces.add(new Queen(7, 3, true));
-        pieces.add(new Knight(7, 6, true));
-        pieces.add(new Rook(7, 7, true));
-         */
+        //position 5 on perft results chess
+        {
+            pieces.clear();
+            
+            pieces.add(new Rook(0, 0, false));
+            pieces.add(new Knight(0, 1, false));
+            pieces.add(new Bishop(0, 2, false));
+            pieces.add(new Queen(0, 3, false));
+            pieces.add(new King(0, 5, false));
+            pieces.get(4).increaseMoveCount();
+            pieces.add(new Rook(0, 7, false));
+
+            pieces.add(new Pawn(1, 0, false));
+            pieces.add(new Pawn(1, 1, false));
+            Pawn aboutToBePromoted = new Pawn(1, 3, true);
+            aboutToBePromoted.increaseMoveCount();
+            pieces.add(aboutToBePromoted);
+            pieces.add(new Bishop(1, 4, false));
+            pieces.add(new Pawn(1, 5, false));
+            pieces.add(new Pawn(1, 6, false));
+            pieces.add(new Pawn(1, 7, false));
+
+            Pawn blackPawnMovedOneTileDown = new Pawn(2, 2, false);
+            blackPawnMovedOneTileDown.increaseMoveCount();
+            pieces.add(blackPawnMovedOneTileDown);
+
+            pieces.add(new Bishop(4, 2, true));
+
+            pieces.add(new Pawn(6, 0, true));
+            pieces.add(new Pawn(6, 1, true));
+            pieces.add(new Pawn(6, 2, true));
+            pieces.add(new Knight(6, 4, true));
+            pieces.add(new Knight(6, 5, false));
+            pieces.add(new Pawn(6, 6, true));
+            pieces.add(new Pawn(6, 7, true));
+
+            pieces.add(new Rook(7, 0, true));
+            pieces.add(new Knight(7, 1, true));
+            pieces.add(new Bishop(7, 2, true));
+            pieces.add(new Queen(7, 3, true));
+            pieces.add(new King(7, 4, true));
+            pieces.add(new Rook(7, 7, true));
+        }
+
         for (int index = 0, numberOfPieces = pieces.size(); index != numberOfPieces; ++index) {
             Piece piece = pieces.get(index);
             grid.getTile(piece.getRow(), piece.getColumn()).setOccupant(piece);
@@ -343,6 +396,16 @@ public final class Board extends JPanel implements Runnable {
 
         updateProtections();
         repaint();
+
+        //position 5 on perft results failed bc our perft implementation
+        //does not account for pawn promotions other than queen
+        //i believe we have madethe move counts on the pieces correct....
+        
+        //it now works, perft has been corrected
+        for (int depth = 0; depth <= 4; ++depth) {
+            System.out.println("GUI Piece Perft(" + depth + "): " + Perft.perft(grid, depth, false));
+        }
+
         paint = access = true;
         history.setData(whiteMoves, blackMoves);
     }

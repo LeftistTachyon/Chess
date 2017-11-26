@@ -34,7 +34,7 @@ public final class MoveUtils {
     public static void undoBlackMovePromotion(Grid grid, List<Piece> whites, List<Piece> blacks, Piece piece, int pawnIndex, Tile moveTile, Tile previousTile) {
         previousTile.setOccupant(piece);
         moveTile.removeOccupant();
-        whites.set(pawnIndex, piece);
+        blacks.set(pawnIndex, piece);
         grid.setProtections(whites, blacks);
     }
     

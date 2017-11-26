@@ -53,9 +53,9 @@ final class SecureMinMaxBlack {
         final List<Piece> blacks = board.blacks;
         final King whiteKing = board.whiteKing;
 
-        Grid clonedGrid;
-        List<Piece> clonedWhites;
-        List<Piece> clonedBlacks;
+        final Grid clonedGrid;
+        final List<Piece> clonedWhites;
+        final List<Piece> clonedBlacks;
 
         if (CHECK_MODE) {
             clonedGrid = new Grid(grid);
@@ -387,9 +387,9 @@ final class SecureMinMaxBlack {
         final List<Piece> blacks = board.blacks;
         final King blackKing = board.blackKing;
 
-        Grid clonedGrid;
-        List<Piece> clonedWhites;
-        List<Piece> clonedBlacks;
+        final Grid clonedGrid;
+        final List<Piece> clonedWhites;
+        final List<Piece> clonedBlacks;
 
         if (CHECK_MODE) {
             clonedGrid = new Grid(grid);

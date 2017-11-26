@@ -341,6 +341,19 @@ public final class Pawn extends Piece {
         return !getEnPassantTiles(grid).isEmpty();
     }
 
+    public static Piece[] getPromoted(Piece pawn) {
+        final int row = pawn.getRow();
+        final int column = pawn.getColumn();
+        final int moveCount = pawn.getMoveCount();
+        final boolean color = pawn.isWhite();
+        return new Piece[]{
+            new Queen(row, column, moveCount, color), 
+            new Rook(row, column, moveCount, color), 
+            new Bishop(row, column, moveCount, color), 
+            new Knight(row, column, moveCount, color)
+        };
+    }
+
     public static Queen promote(Piece pawn) {
         return new Queen(pawn.getRow(), pawn.getColumn(), pawn.getMoveCount(), pawn.isWhite());
     }

@@ -457,7 +457,7 @@ public final class Grid implements Renderable {
                 System.out.println("Error:");
                 System.out.println(tiles[index]);
                 System.out.println(other.tiles[index]);
-                return false;
+                throw new Error();
             }
         }
         return true;

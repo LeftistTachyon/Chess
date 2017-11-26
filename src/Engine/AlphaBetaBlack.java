@@ -16,7 +16,7 @@ import java.util.List;
  */
 final class AlphaBetaBlack {
     
-    private static boolean SECURE_MODE = true;
+    private static final boolean SECURE_MODE = true;
 
     private AlphaBetaBlack() {
 
@@ -583,12 +583,12 @@ final class AlphaBetaBlack {
                             alpha = value;
                         }
                         if (beta <= alpha) {
-                            MoveUtils.undoWhiteMovePromotion(grid, whites, blacks, black, pawnIndex, moveTile, previousTile);
+                            MoveUtils.undoBlackMovePromotion(grid, whites, blacks, black, pawnIndex, moveTile, previousTile);
                             clonedGrid.equals(grid);
                             return alpha;
                         }
                     }
-                    MoveUtils.undoWhiteMovePromotion(grid, whites, blacks, black, pawnIndex, moveTile, previousTile);
+                    MoveUtils.undoBlackMovePromotion(grid, whites, blacks, black, pawnIndex, moveTile, previousTile);
                     clonedGrid.equals(grid);
                 }
                 else {

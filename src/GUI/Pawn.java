@@ -352,6 +352,44 @@ public final class Pawn extends Piece {
         return null;
     }
 
+    public static Piece[] getPromoted(Piece pawn) {
+        final int x = pawn.getX();
+        final int y = pawn.getY();
+        final int width = pawn.getWidth();
+        final int height = pawn.getHeight();
+        final int row = pawn.getRow();
+        final int column = pawn.getColumn();
+        final boolean color = pawn.isWhite();
+        final boolean selected = pawn.isSelected();
+        final int moveCount = pawn.getMoveCount();
+        final Piece[] result = new Piece[4];
+        {
+            Queen promote = new Queen(x, y, width, height, row, column, color);
+            promote.setSelected(selected);
+            promote.setMoveCount(moveCount);
+            result[0] = promote;
+        }
+        {
+            Rook promote = new Rook(x, y, width, height, row, column, color);
+            promote.setSelected(selected);
+            promote.setMoveCount(moveCount);
+            result[1] = promote;
+        }
+        {
+            Bishop promote = new Bishop(x, y, width, height, row, column, color);
+            promote.setSelected(selected);
+            promote.setMoveCount(moveCount);
+            result[2] = promote;
+        }
+        {
+            Knight promote = new Knight(x, y, width, height, row, column, color);
+            promote.setSelected(selected);
+            promote.setMoveCount(moveCount);
+            result[3] = promote;
+        }
+        return result;
+    }
+
     @Override
     public String toOutputString() {
         return super.toOutputString() + "[" + justMadeDoubleJump + "]";

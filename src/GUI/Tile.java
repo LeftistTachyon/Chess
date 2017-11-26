@@ -218,11 +218,11 @@ public final class Tile extends Area {
         result.append(protectedByWhite);
         result.append(" Protected By Black: ");
         result.append(protectedByBlack);
-        result.append("Tint Color: ");
+        result.append(" Tint Color: ");
         result.append(tintColor);
         result.append(" Outline Color: ");
         result.append(outlineColor);
-        result.append("Occupant: ");
+        result.append(" Occupant: ");
         result.append(occupant);
         return result.append("\n").toString();
     }

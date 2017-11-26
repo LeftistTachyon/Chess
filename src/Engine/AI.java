@@ -579,6 +579,12 @@ public final class AI {
                             moveTile.setOccupant(white);
                             grid.setProtections(pieces);
                             if (!whiteKing.inCheck(grid)) {
+                                boolean madeDoubleJump = false;
+                                if (white.isPawn() && !white.hasMoved()) {
+                                    if (white.getRow() == 4) {
+                                        white.setJustMadeDoubleJump(madeDoubleJump = true);
+                                    }
+                                }
                                 white.increaseMoveCount();
                                 {
                                     Piece pawn = Pieces.checkWhiteEnPassantRights(pieces);
@@ -588,6 +594,9 @@ public final class AI {
                                     }
                                 }
                                 white.decreaseMoveCount();
+                                if (madeDoubleJump) {
+                                    white.setJustMadeDoubleJump(false);
+                                }
                             }
                             previousTile.setOccupant(white);
                             moveTile.removeOccupant();
@@ -1040,6 +1049,12 @@ public final class AI {
                             moveTile.setOccupant(black);
                             grid.setProtections(pieces);
                             if (!blackKing.inCheck(grid)) {
+                                boolean madeDoubleJump = false;
+                                if (black.isPawn() && !black.hasMoved()) {
+                                    if (black.getRow() == 3) {
+                                        black.setJustMadeDoubleJump(madeDoubleJump = true);
+                                    }
+                                }
                                 black.increaseMoveCount();
                                 {
                                     Piece pawn = Pieces.checkBlackEnPassantRights(pieces);
@@ -1049,6 +1064,9 @@ public final class AI {
                                     }
                                 }
                                 black.decreaseMoveCount();
+                                if (madeDoubleJump) {
+                                    black.setJustMadeDoubleJump(false);
+                                }
                             }
                             previousTile.setOccupant(black);
                             moveTile.removeOccupant();
