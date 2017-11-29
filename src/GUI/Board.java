@@ -43,7 +43,7 @@ import javax.swing.SwingUtilities;
 //have a board with improper protected tiles
 public final class Board extends JPanel implements Runnable {
     
-    private static final boolean PERFT_START = false;
+    private static final boolean PERFT = false;
 
     //game states
     public static final int LOCAL = 0;
@@ -156,11 +156,11 @@ public final class Board extends JPanel implements Runnable {
             grid.getTile(piece.getRow(), piece.getColumn()).setOccupant(piece);
         }
 
-        for (int pieceIndex = 0; pieceIndex != ChessConstants.MAX_NUMBER_OF_PIECES; ++pieceIndex) {
-            pieces.get(pieceIndex).setProtectedTiles(grid);
+        for (int index = 0; index != ChessConstants.MAX_NUMBER_OF_PIECES; ++index) {
+            pieces.get(index).setProtectedTiles(grid);
         }
 
-        if (PERFT_START) {
+        if (PERFT) {
             for (int depth = 0; depth <= 5; ++depth) {
                 System.out.println("GUI Piece Perft(" + depth + "): " + Perft.perft(grid, depth, false));
             }
@@ -293,6 +293,7 @@ public final class Board extends JPanel implements Runnable {
         pieces.add(new Pawn(1, 6, false));
         pieces.add(new Pawn(1, 7, false));
 
+        /*
         //endgame enpassant victory, probubly buggy, check movecounts
         {
             pieces.clear();
@@ -345,7 +346,7 @@ public final class Board extends JPanel implements Runnable {
             pieces.add(new Rook(7, 7, true));
         }
         
-        //position 5 on perft results chess
+        //position 5 on perft results chess, movecounts accounted for
         {
             pieces.clear();
             
@@ -388,7 +389,7 @@ public final class Board extends JPanel implements Runnable {
             pieces.add(new King(7, 4, true));
             pieces.add(new Rook(7, 7, true));
         }
-
+         */
         for (int index = 0, numberOfPieces = pieces.size(); index != numberOfPieces; ++index) {
             Piece piece = pieces.get(index);
             grid.getTile(piece.getRow(), piece.getColumn()).setOccupant(piece);
@@ -397,13 +398,10 @@ public final class Board extends JPanel implements Runnable {
         updateProtections();
         repaint();
 
-        //position 5 on perft results failed bc our perft implementation
-        //does not account for pawn promotions other than queen
-        //i believe we have madethe move counts on the pieces correct....
-        
-        //it now works, perft has been corrected
-        for (int depth = 0; depth <= 4; ++depth) {
-            System.out.println("GUI Piece Perft(" + depth + "): " + Perft.perft(grid, depth, false));
+        if (PERFT) {
+            for (int depth = 0; depth <= 4; ++depth) {
+                System.out.println("GUI Piece Perft(" + depth + "): " + Perft.perft(grid, depth, false));
+            }
         }
 
         paint = access = true;

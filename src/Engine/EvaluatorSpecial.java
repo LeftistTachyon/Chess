@@ -204,7 +204,7 @@ public class EvaluatorSpecial {
         return POSITIONS_EVALUATED_IN_BLACK_PERSEPECTIVE;
     }
 
-    static final int evaluateInWhitePerspective(Board board) {
+    static final int evaluateInWhitePerspective(ExplicitBoard board) {
         //++POSITIONS_EVALUATED_IN_WHITE_PERSEPECTIVE;
         AI.DIALOG.increasePositionsScanned();
         
@@ -362,9 +362,13 @@ public class EvaluatorSpecial {
         return whiteScore - blackScore;
     }
 
-    static final int evaluateInBlackPerspective(Board board) {
+    static final int evaluateInBlackPerspective(ExplicitBoard board) {
         //++POSITIONS_EVALUATED_IN_BLACK_PERSEPECTIVE;
         AI.DIALOG.increasePositionsScanned();
+        
+        if (AI.BLACK_STORE.containsEntry(board.grid)) {
+            return AI.BLACK_STORE.getValue(board.grid);
+        }
         
         final King whiteKing = board.whiteKing;
         final King blackKing = board.blackKing;
@@ -517,6 +521,7 @@ public class EvaluatorSpecial {
             }
         }
 
+        AI.BLACK_STORE.putEntry(board.grid, blackScore - whiteScore);
         return blackScore - whiteScore;
     }
 }

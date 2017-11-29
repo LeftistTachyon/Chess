@@ -81,7 +81,7 @@ final class AlphaBetaBlack {
                     leftRookCastleTile.removeOccupant();
                     grid.setProtections(whites, blacks);
                     
-                    clonedGrid.equals(grid);
+                    //clonedGrid.equals(grid);
 
                     if (beta <= alpha) {
                         return beta;
@@ -116,7 +116,7 @@ final class AlphaBetaBlack {
                     rightRookCastleTile.removeOccupant();
                     grid.setProtections(whites, blacks);
                     
-                    clonedGrid.equals(grid);
+                    //clonedGrid.equals(grid);
 
                     if (beta <= alpha) {
                         return beta;
@@ -156,12 +156,12 @@ final class AlphaBetaBlack {
                         }
                         if (beta <= alpha) {
                             MoveUtils.undoWhiteCapturePromotion(grid, whites, blacks, white, pawnIndex, enemy, removeIndex, attackTile, previousTile);
-                            clonedGrid.equals(grid);
+                            //clonedGrid.equals(grid);
                             return beta;
                         }
                     }
                     MoveUtils.undoWhiteCapturePromotion(grid, whites, blacks, white, pawnIndex, enemy, removeIndex, attackTile, previousTile);
-                    clonedGrid.equals(grid);
+                    //clonedGrid.equals(grid);
                 }
                 else {
                     int removeIndex = MoveUtils.doWhiteCapture(grid, whites, blacks, attackTile, previousTile);
@@ -177,12 +177,12 @@ final class AlphaBetaBlack {
                         white.decreaseMoveCount();
                         if (beta <= alpha) {
                             MoveUtils.undoWhiteCapture(grid, whites, blacks, enemy, removeIndex, attackTile, previousTile);
-                            clonedGrid.equals(grid);
+                            //clonedGrid.equals(grid);
                             return beta;
                         }
                     }
                     MoveUtils.undoWhiteCapture(grid, whites, blacks, enemy, removeIndex, attackTile, previousTile);
-                    clonedGrid.equals(grid);
+                    //clonedGrid.equals(grid);
                 }
             }
             /*
@@ -286,12 +286,12 @@ final class AlphaBetaBlack {
                         }
                         if (beta <= alpha) {
                             MoveUtils.undoWhiteMovePromotion(grid, whites, blacks, white, pawnIndex, moveTile, previousTile);
-                            clonedGrid.equals(grid);
+                            //clonedGrid.equals(grid);
                             return beta;
                         }
                     }
                     MoveUtils.undoWhiteMovePromotion(grid, whites, blacks, white, pawnIndex, moveTile, previousTile);
-                    clonedGrid.equals(grid);
+                    //clonedGrid.equals(grid);
                 }
                 else {
                     MoveUtils.doMove(grid, whites, blacks, moveTile, previousTile);
@@ -307,17 +307,17 @@ final class AlphaBetaBlack {
                         white.decreaseMoveCount();
                         if (beta <= alpha) {
                             MoveUtils.undoMove(grid, whites, blacks, moveTile, previousTile);
-                            clonedGrid.equals(grid);
+                            //clonedGrid.equals(grid);
                             return beta;
                         }
                     }
                     MoveUtils.undoMove(grid, whites, blacks, moveTile, previousTile);
-                    clonedGrid.equals(grid);
+                    //clonedGrid.equals(grid);
                 }
             }
         }
         
-        clonedGrid.equals(grid);
+        //clonedGrid.equals(grid);
         return (value == POSITIVE_INFINITY) ? checkWhiteEndGame(grid, whiteKing, depth + 1) : beta;
     }
 
@@ -379,7 +379,7 @@ final class AlphaBetaBlack {
                     leftRookCastleTile.removeOccupant();
                     grid.setProtections(whites, blacks);
                     
-                    clonedGrid.equals(grid);
+                    //clonedGrid.equals(grid);
 
                     if (beta <= alpha) {
                         return alpha;
@@ -414,7 +414,7 @@ final class AlphaBetaBlack {
                     rightRookCastleTile.removeOccupant();
                     grid.setProtections(whites, blacks);
                     
-                    clonedGrid.equals(grid);
+                    //clonedGrid.equals(grid);
 
                     if (beta <= alpha) {
                         return alpha;
@@ -454,12 +454,12 @@ final class AlphaBetaBlack {
                         }
                         if (beta <= alpha) {
                             MoveUtils.undoBlackCapturePromotion(grid, whites, blacks, black, pawnIndex, enemy, removeIndex, attackTile, previousTile);
-                            clonedGrid.equals(grid);
+                            //clonedGrid.equals(grid);
                             return alpha;
                         }
                     }
                     MoveUtils.undoBlackCapturePromotion(grid, whites, blacks, black, pawnIndex, enemy, removeIndex, attackTile, previousTile);
-                    clonedGrid.equals(grid);
+                    //clonedGrid.equals(grid);
                 }
                 else {
                     int removeIndex = MoveUtils.doBlackCapture(grid, whites, blacks, attackTile, previousTile);
@@ -475,12 +475,12 @@ final class AlphaBetaBlack {
                         black.decreaseMoveCount();
                         if (beta <= alpha) {
                             MoveUtils.undoBlackCapture(grid, whites, blacks, enemy, removeIndex, attackTile, previousTile);
-                            clonedGrid.equals(grid);
+                            //clonedGrid.equals(grid);
                             return alpha;
                         }
                     }
                     MoveUtils.undoBlackCapture(grid, whites, blacks, enemy, removeIndex, attackTile, previousTile);                           
-                    clonedGrid.equals(grid);
+                    //clonedGrid.equals(grid);
                 }
             }
             /*
@@ -584,12 +584,12 @@ final class AlphaBetaBlack {
                         }
                         if (beta <= alpha) {
                             MoveUtils.undoBlackMovePromotion(grid, whites, blacks, black, pawnIndex, moveTile, previousTile);
-                            clonedGrid.equals(grid);
+                            //clonedGrid.equals(grid);
                             return alpha;
                         }
                     }
                     MoveUtils.undoBlackMovePromotion(grid, whites, blacks, black, pawnIndex, moveTile, previousTile);
-                    clonedGrid.equals(grid);
+                    //clonedGrid.equals(grid);
                 }
                 else {
                     MoveUtils.doMove(grid, whites, blacks, moveTile, previousTile);
@@ -605,12 +605,12 @@ final class AlphaBetaBlack {
                         black.decreaseMoveCount();
                         if (beta <= alpha) {
                             MoveUtils.undoMove(grid, whites, blacks, moveTile, previousTile);
-                            clonedGrid.equals(grid);
+                            //clonedGrid.equals(grid);
                             return alpha;
                         }
                     }
                     MoveUtils.undoMove(grid, whites, blacks, moveTile, previousTile);
-                    clonedGrid.equals(grid);
+                    //clonedGrid.equals(grid);
                 }
             }
         }

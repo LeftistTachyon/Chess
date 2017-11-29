@@ -76,13 +76,13 @@ public final class Perft {
      * possible positions starting from White's turn of the given position. 
      * @return 
      */
-    static final int perft(final Grid grid, int depth, final boolean color) {
+    static final long perft(final Grid grid, int depth, final boolean color) {
         if (depth == 0) {
-            return 1;
+            return 1L;
         }
 
         --depth;
-        int moves = 0;
+        long moves = 0L;
 
         final List<Piece> pieces = grid.getPieces();
         Pieces.sort(pieces);

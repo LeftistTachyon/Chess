@@ -68,8 +68,9 @@ public final class AI {
     };
 
     //stores positions and their values, in both white and black's persepctive.
-    private static final Database STORE = new Database();
-
+    static final Database BLACK_STORE = new Database();
+    static final Database WHITE_STORE = new Database();
+    
     //test mode flag
     private static final boolean CHECK_MODE = true;
 
@@ -305,6 +306,8 @@ public final class AI {
 
     @SuppressWarnings({"Convert2Lambda", "UnusedAssignment"})
     public synchronized void makeMove(List<String> list) {
+        System.out.println("White Database Size: " + WHITE_STORE.size() + " " + Evaluator.MAP_OPERATIONS_WHITE + " Map Operations");
+        System.out.println("Black Database Size: " + BLACK_STORE.size() + " " + Evaluator.MAP_OPERATIONS_BLACK + " Map Operations");
         IMAGE = image;
         if (DIALOG == null) {
             //Chess chess = Chess.getInstance();

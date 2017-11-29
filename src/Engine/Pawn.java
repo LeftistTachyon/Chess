@@ -53,7 +53,8 @@ public final class Pawn extends Piece {
 
     @Override
     public boolean justMadeDoubleJump() {
-        return justMadeDoubleJump && (getMoveCount() == 1) && (isWhite() ? (getRow() == 4) : (getRow() == 3));
+        //return justMadeDoubleJump && (getMoveCount() == 1) && (isWhite() ? (getRow() == 4) : (getRow() == 3));
+        return justMadeDoubleJump;
     }
 
     @Override
@@ -337,8 +338,8 @@ public final class Pawn extends Piece {
         return null;
     }
 
-    public boolean canPuesdoEnPassant(Grid grid) {
-        return !getEnPassantTiles(grid).isEmpty();
+    public boolean canEnPassant(Grid grid) {
+        return getLeftEnPassantTile(grid) != null || getRightEnPassantTile(grid) != null;
     }
 
     public static Piece[] getPromoted(Piece pawn) {
@@ -354,6 +355,7 @@ public final class Pawn extends Piece {
         };
     }
 
+    @Deprecated
     public static Queen promote(Piece pawn) {
         return new Queen(pawn.getRow(), pawn.getColumn(), pawn.getMoveCount(), pawn.isWhite());
     }

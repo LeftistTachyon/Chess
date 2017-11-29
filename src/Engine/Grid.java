@@ -451,6 +451,9 @@ public final class Grid {
     @Deprecated
     @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
     public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
         //System.out.println("Debugging");
         Grid other = (Grid) obj;
         for (int index = 0; index < ChessConstants.LINEAR_LENGTH; ++index) {

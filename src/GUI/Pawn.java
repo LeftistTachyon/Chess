@@ -50,7 +50,8 @@ public final class Pawn extends Piece {
 
     @Override
     public boolean justMadeDoubleJump() {
-        return justMadeDoubleJump && (getMoveCount() == 1) && (isWhite() ? (getRow() == 4) : (getRow() == 3));
+        //return justMadeDoubleJump && (getMoveCount() == 1) && (isWhite() ? (getRow() == 4) : (getRow() == 3));
+        return justMadeDoubleJump;
     }
 
     @Override

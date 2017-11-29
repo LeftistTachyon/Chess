@@ -10,6 +10,7 @@ import static Util.ChessConstants.KNIGHT_VALUE;
 import static Util.ChessConstants.PAWN_VALUE;
 import static Util.ChessConstants.QUEEN_VALUE;
 import static Util.ChessConstants.ROOK_VALUE;
+import java.math.BigInteger;
 import java.util.List;
 
 public final class Evaluator {
@@ -205,10 +206,18 @@ public final class Evaluator {
     public static int getNumberOfPositionsEvaluatedInBlackPersepective() {
         return POSITIONS_EVALUATED_IN_BLACK_PERSEPECTIVE;
     }
-
+    
+    static BigInteger MAP_OPERATIONS_WHITE = BigInteger.ZERO;
+    static BigInteger MAP_OPERATIONS_BLACK = BigInteger.ZERO;
+    
     static final int evaluateInWhitePerspective(final Grid grid, final List<Piece> whites, final List<Piece> blacks) {
         //++POSITIONS_EVALUATED_IN_WHITE_PERSEPECTIVE;
         AI.DIALOG.increasePositionsScanned();
+       
+        if (AI.WHITE_STORE.containsEntry(grid)) {
+            MAP_OPERATIONS_WHITE = MAP_OPERATIONS_WHITE.add(BigInteger.ONE);
+            return AI.WHITE_STORE.getValue(grid);
+        }
 
         final int numberOfWhitePieces = whites.size();
         final int numberOfBlackPieces = blacks.size();
@@ -441,13 +450,19 @@ public final class Evaluator {
                 whiteScore += BISHOP_BONUS;
             }
         }
-
-        return whiteScore - blackScore;
+        int score = whiteScore - blackScore;
+        AI.WHITE_STORE.putEntry(grid, score);
+        return score;
     }
 
     static final int evaluateInBlackPerspective(final Grid grid, final List<Piece> whites, final List<Piece> blacks) {
         //++POSITIONS_EVALUATED_IN_BLACK_PERSEPECTIVE;
         AI.DIALOG.increasePositionsScanned();
+        
+        if (AI.BLACK_STORE.containsEntry(grid)) {
+            MAP_OPERATIONS_BLACK = MAP_OPERATIONS_BLACK.add(BigInteger.ONE);
+            return AI.BLACK_STORE.getValue(grid);
+        }
 
         final int numberOfWhitePieces = whites.size();
         final int numberOfBlackPieces = blacks.size();
@@ -681,6 +696,8 @@ public final class Evaluator {
             }
         }
 
-        return blackScore - whiteScore;
+        int score = blackScore - whiteScore;
+        AI.BLACK_STORE.putEntry(grid, score);
+        return score;
     }
 }

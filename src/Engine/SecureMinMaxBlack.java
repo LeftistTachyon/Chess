@@ -40,17 +40,18 @@ final class SecureMinMaxBlack {
      * losing or is about to be checkmated.
      */
     static int min(final Board board, int depth) {
+        final Grid grid = board.grid;
+        final List<Piece> whites = board.whites;
+        final List<Piece> blacks = board.blacks;
+        
         if (depth == 0) {
             ++PERFT_COUNTER;
-            return EvaluatorSpecial.evaluateInBlackPerspective(board);
+            return Evaluator.evaluateInBlackPerspective(grid, whites, blacks);
         }
 
         --depth;
         int min = POSITIVE_INFINITY;
 
-        final Grid grid = board.grid;
-        final List<Piece> whites = board.whites;
-        final List<Piece> blacks = board.blacks;
         final King whiteKing = board.whiteKing;
 
         final Grid clonedGrid;
@@ -374,17 +375,18 @@ final class SecureMinMaxBlack {
      * losing or is about to be checkmated.
      */
     static int max(final Board board, int depth) {
+        final Grid grid = board.grid;
+        final List<Piece> whites = board.whites;
+        final List<Piece> blacks = board.blacks;
+        
         if (depth == 0) {
             ++PERFT_COUNTER;
-            return EvaluatorSpecial.evaluateInBlackPerspective(board);
+            return Evaluator.evaluateInBlackPerspective(grid, whites, blacks);
         }
 
         --depth;
         int max = NEGATIVE_INFINITY;
 
-        final Grid grid = board.grid;
-        final List<Piece> whites = board.whites;
-        final List<Piece> blacks = board.blacks;
         final King blackKing = board.blackKing;
 
         final Grid clonedGrid;

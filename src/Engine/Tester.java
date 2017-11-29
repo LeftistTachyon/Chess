@@ -42,6 +42,7 @@ final class Tester {
     }
     
     public static final void main(String... args) {
+        System.out.println(055L); //octal
         String s = "type anything here";
         s = s.replace("white", "black");
         s = s.replace("WHITE", "BLACK");
@@ -51,7 +52,7 @@ final class Tester {
         System.out.println("Number of Processors: " + Constants.RUNTIME.availableProcessors());
         System.out.println();
         
-        for (int times = 10; times >= 0; --times) {
+        for (int times = 10; times > 0; --times) {
             int[] first = new int[10000000];
             int[] second = new int[10000000];
             long start = System.nanoTime();
@@ -121,6 +122,8 @@ final class Tester {
 
             testPosition(pieces, false);
         }
+        
+        Constants.RUNTIME.exit(0);
     }
 
     private static void testStartPosition() {
@@ -253,18 +256,19 @@ final class Tester {
             System.out.println();
         }
     }
-    
+
     //checks to see if evaluator & evaluator special agree
+    //check protected tiles!
     static void value(Grid grid) {
         List<Piece> pieces = grid.getPieces();
         Pieces.sort(pieces);
         List<Piece> whites = Pieces.getWhite(pieces);
         List<Piece> blacks = Pieces.getBlack(pieces);
         int normal = Evaluator.evaluateInBlackPerspective(grid, whites, blacks);
-        Board board = new Board(grid);
+        ExplicitBoard board = new ExplicitBoard(grid);
         int special = EvaluatorSpecial.evaluateInBlackPerspective(board);
         if (normal != special) {
-            throw new Error();
+            throw new Error("Normal: " + normal + " Special: " + special);
         }
     }
 
@@ -277,7 +281,7 @@ final class Tester {
             Piece piece = pieces.get(index);
             grid.getTile(piece.getRow(), piece.getColumn()).setOccupant(piece);
         }
-        
+
         //for each piece, test their protected tiles
         for (int pieceIndex = 0; pieceIndex != numberOfPieces; ++pieceIndex) {
             final Piece piece = pieces.get(pieceIndex);
@@ -304,17 +308,17 @@ final class Tester {
             }
         }
         grid.setProtections(pieces);
-        
+
         Grid copiedGrid = new Grid(grid);
         List<Piece> copiedPieces = Pieces.getDeepCopy(pieces);
         for (int depth = 1; depth <= MAX_DEPTH; ++depth) {
             System.out.println((!color ? "White" : "Black") + " Perft(" + depth + ") Result: " + perft(grid, depth, color));
         }
-       
+
         check(grid, copiedGrid, pieces, copiedPieces);
         System.out.println();
     }
-    
+
     //checks to make sure all piece protection methods are working properly
     static final void checkProtections(final List<Piece> pieces, final boolean color) {
         final List<Piece> clonedPieces = Pieces.getDeepCopy(pieces);
@@ -326,7 +330,7 @@ final class Tester {
             Piece piece = pieces.get(index);
             grid.getTile(piece.getRow(), piece.getColumn()).setOccupant(piece);
         }
-        
+
         //for each piece, test their protected tiles
         for (int pieceIndex = 0; pieceIndex != numberOfPieces; ++pieceIndex) {
             final Piece piece = pieces.get(pieceIndex);
@@ -355,18 +359,16 @@ final class Tester {
         grid.setProtections(pieces);
         check(grid, new Grid(grid), pieces, clonedPieces);
     }
-    
+
     //after a player makes a turn that does
     //not capture the enemy pawn that moved up 2 tiles
     //that enemy pawn is now immune from enpassant 
-    
     /**
      * Method that should be called immediately after White successfully
-     * finishes his/her turn. If a Black Pawn made a double jump just 
-     * before White's last turn, and has not been captured En Passant,
-     * it is now permanently immune from 
-     * being targeted by En Passant. 
-     * 
+     * finishes his/her turn. If a Black Pawn made a double jump just before
+     * White's last turn, and has not been captured En Passant, it is now
+     * permanently immune from being targeted by En Passant.
+     *
      * @see checkBlackEnPassantRights()
      */
     private static Piece checkWhiteEnPassantRights(List<Piece> pieces) {
@@ -384,11 +386,10 @@ final class Tester {
 
     /**
      * Method that should be called immediately after Black successfully
-     * finishes his/her turn. If a White Pawn made a double jump just 
-     * before Black's last turn, and has not been captured
-     * En Passant, it is now permanently immune from 
-     * being targeted by En Passant. 
-     * 
+     * finishes his/her turn. If a White Pawn made a double jump just before
+     * Black's last turn, and has not been captured En Passant, it is now
+     * permanently immune from being targeted by En Passant.
+     *
      * @see checkWhiteEnPassantRights()
      */
     private static Piece checkBlackEnPassantRights(List<Piece> pieces) {
@@ -406,16 +407,16 @@ final class Tester {
 
     //improved perft function  
     /**
-     * Counts the number of all possible positions from a given 
-     * start position.
+     * Counts the number of all possible positions from a given start position.
+     *
      * @param grid The given chess position.
      * @param depth How deep the calculation should be.
-     * @param color Which player to start the calculation from. 
-     * If {@code true} then this function will count the number of all 
-     * possible positions starting from Black's turn of the given position. 
-     * If {@code false} then this function will count the number of all
-     * possible positions starting from White's turn of the given position. 
-     * @return 
+     * @param color Which player to start the calculation from. If {@code true}
+     * then this function will count the number of all possible positions
+     * starting from Black's turn of the given position. If {@code false} then
+     * this function will count the number of all possible positions starting
+     * from White's turn of the given position.
+     * @return
      */
     static final long perft(final Grid grid, int depth, final boolean color) {
         if (depth == 0) {
@@ -456,10 +457,12 @@ final class Tester {
 
                         blackKing.increaseMoveCount();
                         leftRook.increaseMoveCount();
-                        Piece pawn = checkBlackEnPassantRights(pieces);
-                        moves += perft(grid, depth, !color);
-                        if (pawn != null) {
-                            pawn.setJustMadeDoubleJump(true);
+                        {
+                            Piece pawn = checkBlackEnPassantRights(pieces);
+                            moves += perft(grid, depth, !color);
+                            if (pawn != null) {
+                                pawn.setJustMadeDoubleJump(true);
+                            }
                         }
                         blackKing.decreaseMoveCount();
                         leftRook.decreaseMoveCount();
@@ -483,10 +486,12 @@ final class Tester {
 
                         blackKing.increaseMoveCount();
                         rightRook.increaseMoveCount();
-                        Piece pawn = checkBlackEnPassantRights(pieces);
-                        moves += perft(grid, depth, !color);
-                        if (pawn != null) {
-                            pawn.setJustMadeDoubleJump(true);
+                        {
+                            Piece pawn = checkBlackEnPassantRights(pieces);
+                            moves += perft(grid, depth, !color);
+                            if (pawn != null) {
+                                pawn.setJustMadeDoubleJump(true);
+                            }
                         }
                         blackKing.decreaseMoveCount();
                         rightRook.decreaseMoveCount();
@@ -525,10 +530,12 @@ final class Tester {
                             grid.setProtections(pieces);
                             if (!blackKing.inCheck(grid)) {
                                 replace.increaseMoveCount();
-                                Piece pawn = checkBlackEnPassantRights(pieces);
-                                moves += perft(grid, depth, !color);
-                                if (pawn != null) {
-                                    pawn.setJustMadeDoubleJump(true);
+                                {
+                                    Piece pawn = checkBlackEnPassantRights(pieces);
+                                    moves += perft(grid, depth, !color);
+                                    if (pawn != null) {
+                                        pawn.setJustMadeDoubleJump(true);
+                                    }
                                 }
                             }
                             previousTile.setOccupant(black);
@@ -545,10 +552,12 @@ final class Tester {
                         grid.setProtections(pieces);
                         if (!blackKing.inCheck(grid)) {
                             black.increaseMoveCount();
-                            Piece pawn = checkBlackEnPassantRights(pieces);
-                            moves += perft(grid, depth, !color);
-                            if (pawn != null) {
-                                pawn.setJustMadeDoubleJump(true);
+                            {
+                                Piece pawn = checkBlackEnPassantRights(pieces);
+                                moves += perft(grid, depth, !color);
+                                if (pawn != null) {
+                                    pawn.setJustMadeDoubleJump(true);
+                                }
                             }
                             black.decreaseMoveCount();
                         }
@@ -572,10 +581,12 @@ final class Tester {
                             grid.setProtections(pieces);
                             if (!blackKing.inCheck(grid)) {
                                 black.increaseMoveCount();
-                                Piece pawn = checkBlackEnPassantRights(pieces);
-                                moves += perft(grid, depth, !color);
-                                if (pawn != null) {
-                                    pawn.setJustMadeDoubleJump(true);
+                                {
+                                    Piece pawn = checkBlackEnPassantRights(pieces);
+                                    moves += perft(grid, depth, !color);
+                                    if (pawn != null) {
+                                        pawn.setJustMadeDoubleJump(true);
+                                    }
                                 }
                                 black.decreaseMoveCount();
                             }
@@ -598,10 +609,12 @@ final class Tester {
                             grid.setProtections(pieces);
                             if (!blackKing.inCheck(grid)) {
                                 black.increaseMoveCount();
-                                Piece pawn = checkBlackEnPassantRights(pieces);
-                                moves += perft(grid, depth, !color);
-                                if (pawn != null) {
-                                    pawn.setJustMadeDoubleJump(true);
+                                {
+                                    Piece pawn = checkBlackEnPassantRights(pieces);
+                                    moves += perft(grid, depth, !color);
+                                    if (pawn != null) {
+                                        pawn.setJustMadeDoubleJump(true);
+                                    }
                                 }
                                 black.decreaseMoveCount();
                             }
@@ -634,10 +647,12 @@ final class Tester {
                             grid.setProtections(pieces);
                             if (!blackKing.inCheck(grid)) {
                                 replace.increaseMoveCount();
-                                Piece pawn = checkBlackEnPassantRights(pieces);
-                                moves += perft(grid, depth, !color);
-                                if (pawn != null) {
-                                    pawn.setJustMadeDoubleJump(true);
+                                {
+                                    Piece pawn = checkBlackEnPassantRights(pieces);
+                                    moves += perft(grid, depth, !color);
+                                    if (pawn != null) {
+                                        pawn.setJustMadeDoubleJump(true);
+                                    }
                                 }
                             }
                             previousTile.setOccupant(black);
@@ -660,10 +675,12 @@ final class Tester {
                                 }
                             }
                             black.increaseMoveCount();
-                            Piece pawn = checkBlackEnPassantRights(pieces);
-                            moves += perft(grid, depth, !color);
-                            if (pawn != null) {
-                                pawn.setJustMadeDoubleJump(true);
+                            {
+                                Piece pawn = checkBlackEnPassantRights(pieces);
+                                moves += perft(grid, depth, !color);
+                                if (pawn != null) {
+                                    pawn.setJustMadeDoubleJump(true);
+                                }
                             }
                             black.decreaseMoveCount();
                             if (madeDoubleJump) {
@@ -703,10 +720,12 @@ final class Tester {
 
                         whiteKing.increaseMoveCount();
                         leftRook.increaseMoveCount();
-                        Piece pawn = checkWhiteEnPassantRights(pieces);
-                        moves += perft(grid, depth, !color);
-                        if (pawn != null) {
-                            pawn.setJustMadeDoubleJump(true);
+                        {
+                            Piece pawn = checkWhiteEnPassantRights(pieces);
+                            moves += perft(grid, depth, !color);
+                            if (pawn != null) {
+                                pawn.setJustMadeDoubleJump(true);
+                            }
                         }
                         whiteKing.decreaseMoveCount();
                         leftRook.decreaseMoveCount();
@@ -730,10 +749,12 @@ final class Tester {
 
                         whiteKing.increaseMoveCount();
                         rightRook.increaseMoveCount();
-                        Piece pawn = checkWhiteEnPassantRights(pieces);
-                        moves += perft(grid, depth, !color);
-                        if (pawn != null) {
-                            pawn.setJustMadeDoubleJump(true);
+                        {
+                            Piece pawn = checkWhiteEnPassantRights(pieces);
+                            moves += perft(grid, depth, !color);
+                            if (pawn != null) {
+                                pawn.setJustMadeDoubleJump(true);
+                            }
                         }
                         whiteKing.decreaseMoveCount();
                         rightRook.decreaseMoveCount();
@@ -772,10 +793,12 @@ final class Tester {
                             grid.setProtections(pieces);
                             if (!whiteKing.inCheck(grid)) {
                                 replace.increaseMoveCount();
-                                Piece pawn = checkWhiteEnPassantRights(pieces);
-                                moves += perft(grid, depth, !color);
-                                if (pawn != null) {
-                                    pawn.setJustMadeDoubleJump(true);
+                                {
+                                    Piece pawn = checkWhiteEnPassantRights(pieces);
+                                    moves += perft(grid, depth, !color);
+                                    if (pawn != null) {
+                                        pawn.setJustMadeDoubleJump(true);
+                                    }
                                 }
                             }
                             previousTile.setOccupant(white);
@@ -792,10 +815,12 @@ final class Tester {
                         grid.setProtections(pieces);
                         if (!whiteKing.inCheck(grid)) {
                             white.increaseMoveCount();
-                            Piece pawn = checkWhiteEnPassantRights(pieces);
-                            moves += perft(grid, depth, !color);
-                            if (pawn != null) {
-                                pawn.setJustMadeDoubleJump(true);
+                            {
+                                Piece pawn = checkWhiteEnPassantRights(pieces);
+                                moves += perft(grid, depth, !color);
+                                if (pawn != null) {
+                                    pawn.setJustMadeDoubleJump(true);
+                                }
                             }
                             white.decreaseMoveCount();
                         }
@@ -819,10 +844,12 @@ final class Tester {
                             grid.setProtections(pieces);
                             if (!whiteKing.inCheck(grid)) {
                                 white.increaseMoveCount();
-                                Piece pawn = checkWhiteEnPassantRights(pieces);
-                                moves += perft(grid, depth, !color);
-                                if (pawn != null) {
-                                    pawn.setJustMadeDoubleJump(true);
+                                {
+                                    Piece pawn = checkWhiteEnPassantRights(pieces);
+                                    moves += perft(grid, depth, !color);
+                                    if (pawn != null) {
+                                        pawn.setJustMadeDoubleJump(true);
+                                    }
                                 }
                                 white.decreaseMoveCount();
                             }
@@ -845,10 +872,12 @@ final class Tester {
                             grid.setProtections(pieces);
                             if (!whiteKing.inCheck(grid)) {
                                 white.increaseMoveCount();
-                                Piece pawn = checkWhiteEnPassantRights(pieces);
-                                moves += perft(grid, depth, !color);
-                                if (pawn != null) {
-                                    pawn.setJustMadeDoubleJump(true);
+                                {
+                                    Piece pawn = checkWhiteEnPassantRights(pieces);
+                                    moves += perft(grid, depth, !color);
+                                    if (pawn != null) {
+                                        pawn.setJustMadeDoubleJump(true);
+                                    }
                                 }
                                 white.decreaseMoveCount();
                             }
@@ -859,6 +888,7 @@ final class Tester {
                             grid.setProtections(pieces);
                         }
                     }
+                    Tester.check(grid, clonedGrid, pieces, clonedPieces);
                 }
             }
 
@@ -880,10 +910,12 @@ final class Tester {
                             grid.setProtections(pieces);
                             if (!whiteKing.inCheck(grid)) {
                                 replace.increaseMoveCount();
-                                Piece pawn = checkWhiteEnPassantRights(pieces);
-                                moves += perft(grid, depth, !color);
-                                if (pawn != null) {
-                                    pawn.setJustMadeDoubleJump(true);
+                                {
+                                    Piece pawn = checkWhiteEnPassantRights(pieces);
+                                    moves += perft(grid, depth, !color);
+                                    if (pawn != null) {
+                                        pawn.setJustMadeDoubleJump(true);
+                                    }
                                 }
                             }
                             previousTile.setOccupant(white);
@@ -904,10 +936,12 @@ final class Tester {
                                 }
                             }
                             white.increaseMoveCount();
-                            Piece pawn = checkWhiteEnPassantRights(pieces);
-                            moves += perft(grid, depth, !color);
-                            if (pawn != null) {
-                                pawn.setJustMadeDoubleJump(true);
+                            {
+                                Piece pawn = checkWhiteEnPassantRights(pieces);
+                                moves += perft(grid, depth, !color);
+                                if (pawn != null) {
+                                    pawn.setJustMadeDoubleJump(true);
+                                }
                             }
                             white.decreaseMoveCount();
                             if (madeDoubleJump) {
@@ -925,7 +959,7 @@ final class Tester {
             return moves;
         }
     }
-    
+
     //will not work since we dont read piece movecounts
     //which is important for enpassant and castling and other stuff
     @Deprecated
@@ -977,7 +1011,7 @@ final class Tester {
                             grid.getTile(gridIndex).setOccupant(new Pawn(0, 0, true));
                             break;
                         }
-                    
+
                         case 'k': {
                             grid.getTile(gridIndex).setOccupant(new King(0, 0, !true));
                             break;
