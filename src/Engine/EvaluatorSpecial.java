@@ -521,7 +521,7 @@ public class EvaluatorSpecial {
             }
         }
 
-        AI.BLACK_STORE.putEntry(board.grid, blackScore - whiteScore);
+        //AI.BLACK_STORE.putEntry(board.grid, blackScore - whiteScore);
         return blackScore - whiteScore;
     }
 }

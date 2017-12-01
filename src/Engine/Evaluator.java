@@ -451,7 +451,7 @@ public final class Evaluator {
             }
         }
         int score = whiteScore - blackScore;
-        AI.WHITE_STORE.putEntry(grid, score);
+        //AI.WHITE_STORE.putEntry(grid, score);
         return score;
     }
 
@@ -697,7 +697,7 @@ public final class Evaluator {
         }
 
         int score = blackScore - whiteScore;
-        AI.BLACK_STORE.putEntry(grid, score);
+        //AI.BLACK_STORE.putEntry(grid, score);
         return score;
     }
 }

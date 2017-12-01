@@ -165,24 +165,21 @@ final class Pieces {
         }
         return null;
     }
-    
+
     /**
      * Method that should be called immediately after White successfully
-     * finishes his/her turn. If a Black Pawn made a double jump just 
-     * before White's last turn, and has not been captured En Passant,
-     * it is now permanently immune from 
-     * being targeted by En Passant. 
-     * 
+     * finishes his/her turn. If a Black Pawn made a double jump just before
+     * White's last turn, and has not been captured En Passant, it is now
+     * permanently immune from being targeted by En Passant.
+     *
      * @see checkBlackEnPassantRights()
      */
-    public static Piece checkWhiteEnPassantRights(List<Piece> pieces) {
-        for (int index = 0, size = pieces.size(); index != size; ++index) {
-            Piece piece = pieces.get(index);
-            if (piece.isPawn() && piece.isBlack()) {
-                if (piece.justMadeDoubleJump()) {
-                    piece.setJustMadeDoubleJump(false);
-                    return piece;
-                }
+    public static Piece checkWhiteEnPassantRights(List<Piece> blackPieces) {
+        for (int index = 0, size = blackPieces.size(); index != size; ++index) {
+            Piece blackPiece = blackPieces.get(index);
+            if (blackPiece.isPawn() && blackPiece.justMadeDoubleJump()) {
+                blackPiece.setJustMadeDoubleJump(false);
+                return blackPiece;
             }
         }
         return null;
@@ -190,21 +187,18 @@ final class Pieces {
 
     /**
      * Method that should be called immediately after Black successfully
-     * finishes his/her turn. If a White Pawn made a double jump just 
-     * before Black's last turn, and has not been captured
-     * En Passant, it is now permanently immune from 
-     * being targeted by En Passant. 
-     * 
+     * finishes his/her turn. If a White Pawn made a double jump just before
+     * Black's last turn, and has not been captured En Passant, it is now
+     * permanently immune from being targeted by En Passant.
+     *
      * @see checkWhiteEnPassantRights()
      */
-    public static Piece checkBlackEnPassantRights(List<Piece> pieces) {
-        for (int index = 0, size = pieces.size(); index != size; ++index) {
-            Piece piece = pieces.get(index);
-            if (piece.isPawn() && piece.isWhite()) {
-                if (piece.justMadeDoubleJump()) {
-                    piece.setJustMadeDoubleJump(false);
-                    return piece;
-                }
+    public static Piece checkBlackEnPassantRights(List<Piece> whitePieces) {
+        for (int index = 0, size = whitePieces.size(); index != size; ++index) {
+            Piece whitePiece = whitePieces.get(index);
+            if (whitePiece.isPawn() && whitePiece.justMadeDoubleJump()) {
+                whitePiece.setJustMadeDoubleJump(false);
+                return whitePiece;
             }
         }
         return null;
@@ -227,6 +221,29 @@ final class Pieces {
             if (whitePawn.justMadeDoubleJump()) {
                 whitePawn.setJustMadeDoubleJump(false);
                 return whitePawn;
+            }
+        }
+        return null;
+    }
+
+    //slower versions since they must work with all types of pieces
+    public static Piece checkWhiteEnPassantRightsSlow(List<Piece> pieces) {
+        for (int index = 0, size = pieces.size(); index != size; ++index) {
+            Piece piece = pieces.get(index);
+            if (piece.isPawn() && piece.isBlack() && piece.justMadeDoubleJump()) {
+                piece.setJustMadeDoubleJump(false);
+                return piece;
+            }
+        }
+        return null;
+    }
+
+    public static Piece checkBlackEnPassantRightsSlow(List<Piece> pieces) {
+        for (int index = 0, size = pieces.size(); index != size; ++index) {
+            Piece piece = pieces.get(index);
+            if (piece.isPawn() && piece.isWhite() && piece.justMadeDoubleJump()) {
+                piece.setJustMadeDoubleJump(false);
+                return piece;
             }
         }
         return null;

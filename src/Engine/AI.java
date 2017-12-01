@@ -1,6 +1,8 @@
 package Engine;
 
 import static Engine.PieceConverter.PIECE_CONVERTER;
+import static Engine.Pieces.checkBlackEnPassantRightsSlow;
+import static Engine.Pieces.checkWhiteEnPassantRightsSlow;
 import GUI.Chess;
 import Util.ChessConstants;
 import Util.Constants;
@@ -70,7 +72,7 @@ public final class AI {
     //stores positions and their values, in both white and black's persepctive.
     static final Database BLACK_STORE = new Database();
     static final Database WHITE_STORE = new Database();
-    
+
     //test mode flag
     private static final boolean CHECK_MODE = true;
 
@@ -306,8 +308,8 @@ public final class AI {
 
     @SuppressWarnings({"Convert2Lambda", "UnusedAssignment"})
     public synchronized void makeMove(List<String> list) {
-        System.out.println("White Database Size: " + WHITE_STORE.size() + " " + Evaluator.MAP_OPERATIONS_WHITE + " Map Operations");
-        System.out.println("Black Database Size: " + BLACK_STORE.size() + " " + Evaluator.MAP_OPERATIONS_BLACK + " Map Operations");
+        System.out.println("White Database Size: " + WHITE_STORE.size() + " Map Operations: " + Evaluator.MAP_OPERATIONS_WHITE);
+        System.out.println("Black Database Size: " + BLACK_STORE.size() + " Map Operations: " + Evaluator.MAP_OPERATIONS_BLACK);
         IMAGE = image;
         if (DIALOG == null) {
             //Chess chess = Chess.getInstance();
@@ -363,6 +365,7 @@ public final class AI {
 
         if (side) {
             System.out.println("White AI Playing");
+            //white move generation
             {
                 final List<Piece> whites = Pieces.getWhite(pieces);
                 final King whiteKing = Pieces.getWhiteKing(whites);
@@ -385,8 +388,10 @@ public final class AI {
                             whiteKing.increaseMoveCount();
                             leftRook.increaseMoveCount();
                             {
-                                Piece pawn = Pieces.checkWhiteEnPassantRights(pieces);
-                                possiblePositions.add(new PositionHolder(new Grid(grid), "White King castles left from " + previousTile.getNotationLocation() + " to " + whiteKing.getNotationLocation() + " and the White Rook at [1,A] has moved to [1,D]."));
+                                Piece pawn = checkWhiteEnPassantRightsSlow(pieces);
+                                {
+                                    possiblePositions.add(new PositionHolder(new Grid(grid), MoveUtils.getCastleText(whiteKing, previousTile, leftRook, leftRookTile)));
+                                }
                                 if (pawn != null) {
                                     pawn.setJustMadeDoubleJump(true);
                                 }
@@ -414,8 +419,10 @@ public final class AI {
                             whiteKing.increaseMoveCount();
                             rightRook.increaseMoveCount();
                             {
-                                Piece pawn = Pieces.checkWhiteEnPassantRights(pieces);
-                                possiblePositions.add(new PositionHolder(new Grid(grid), "White King castles right from " + previousTile.getNotationLocation() + " to " + whiteKing.getNotationLocation() + " and the White Rook at [1,H] has moved to [1,F]."));
+                                Piece pawn = checkWhiteEnPassantRightsSlow(pieces);
+                                {
+                                    possiblePositions.add(new PositionHolder(new Grid(grid), MoveUtils.getCastleText(whiteKing, previousTile, rightRook, rightRookTile)));
+                                }
                                 if (pawn != null) {
                                     pawn.setJustMadeDoubleJump(true);
                                 }
@@ -442,39 +449,50 @@ public final class AI {
                     for (int index = (attackTiles.size() - 1); index >= 0; --index) {
                         Tile attackTile = attackTiles.get(index);
                         Piece enemy = attackTile.getOccupant();
-                        previousTile.removeOccupant();
+                        if (enemy.isKing()) {
+                            System.out.println("Enemy King targeted!");
+                            continue;
+                        }
                         if (white.isPawn() && previousRow == 1) {
-                            Queen replace = Pawn.promote(white);
-                            attackTile.setOccupant(replace);
-                            int pawnIndex = pieces.indexOf(white);
-                            pieces.set(pawnIndex, replace);
-                            int removeIndex = Pieces.remove(pieces, enemy);
-                            grid.setProtections(pieces);
-                            if (!whiteKing.inCheck(grid)) {
-                                replace.increaseMoveCount();
-                                {
-                                    Piece pawn = Pieces.checkWhiteEnPassantRights(pieces);
-                                    possiblePositions.add(new PositionHolder(new Grid(grid), "White Pawn at " + previousTile.getNotationLocation() + " has captured " + enemy.getName() + " at " + replace.getNotationLocation() + " and has been promoted to a White Queen."));
-                                    if (pawn != null) {
-                                        pawn.setJustMadeDoubleJump(true);
+                            //Queen replace = Pawn.promote(white);
+                            for (Piece replace : Pawn.getPromoted(white)) {
+                                previousTile.removeOccupant();
+                                attackTile.setOccupant(replace);
+                                int pawnIndex = pieces.indexOf(white);
+                                pieces.set(pawnIndex, replace);
+                                int removeIndex = Pieces.remove(pieces, enemy);
+                                grid.setProtections(pieces);
+                                if (!whiteKing.inCheck(grid)) {
+                                    replace.increaseMoveCount();
+                                    {
+                                        Piece pawn = checkWhiteEnPassantRightsSlow(pieces);
+                                        {
+                                            possiblePositions.add(new PositionHolder(new Grid(grid), MoveUtils.getCapturePromotedText(white, previousTile, replace, enemy)));
+                                        }
+                                        if (pawn != null) {
+                                            pawn.setJustMadeDoubleJump(true);
+                                        }
                                     }
                                 }
+                                previousTile.setOccupant(white);
+                                attackTile.setOccupant(enemy);
+                                pieces.add(removeIndex, enemy);
+                                pieces.set(pawnIndex, white);
+                                grid.setProtections(pieces);
                             }
-                            previousTile.setOccupant(white);
-                            attackTile.setOccupant(enemy);
-                            pieces.add(removeIndex, enemy);
-                            pieces.set(pawnIndex, white);
-                            grid.setProtections(pieces);
                         }
                         else {
+                            previousTile.removeOccupant();
                             attackTile.setOccupant(white);
                             int removeIndex = Pieces.remove(pieces, enemy);
                             grid.setProtections(pieces);
                             if (!whiteKing.inCheck(grid)) {
                                 white.increaseMoveCount();
                                 {
-                                    Piece pawn = Pieces.checkWhiteEnPassantRights(pieces);
-                                    possiblePositions.add(new PositionHolder(new Grid(grid), white.getName() + " at " + previousTile.getNotationLocation() + " has captured " + enemy.getName() + " at " + white.getNotationLocation()));
+                                    Piece pawn = checkWhiteEnPassantRightsSlow(pieces);
+                                    {
+                                        possiblePositions.add(new PositionHolder(new Grid(grid), MoveUtils.getCaptureText(white, previousTile, enemy)));
+                                    }
                                     if (pawn != null) {
                                         pawn.setJustMadeDoubleJump(true);
                                     }
@@ -502,8 +520,10 @@ public final class AI {
                                 if (!whiteKing.inCheck(grid)) {
                                     white.increaseMoveCount();
                                     {
-                                        Piece pawn = Pieces.checkWhiteEnPassantRights(pieces);
-                                        possiblePositions.add(new PositionHolder(new Grid(grid), "White Pawn at " + previousTile.getNotationLocation() + " performed enpassant capture on the Black Pawn at " + blackPawn.getNotationLocation() + " and has moved from " + previousTile.getNotationLocation() + " to " + white.getNotationLocation()));
+                                        Piece pawn = checkWhiteEnPassantRightsSlow(pieces);
+                                        {
+                                            possiblePositions.add(new PositionHolder(new Grid(grid), MoveUtils.getEnPassantText(white, previousTile, blackPawn)));
+                                        }
                                         if (pawn != null) {
                                             pawn.setJustMadeDoubleJump(true);
                                         }
@@ -530,8 +550,10 @@ public final class AI {
                                 if (!whiteKing.inCheck(grid)) {
                                     white.increaseMoveCount();
                                     {
-                                        Piece pawn = Pieces.checkWhiteEnPassantRights(pieces);
-                                        possiblePositions.add(new PositionHolder(new Grid(grid), "White Pawn at " + previousTile.getNotationLocation() + " performed enpassant capture on the Black Pawn at " + blackPawn.getNotationLocation() + " and has moved from " + previousTile.getNotationLocation() + " to " + white.getNotationLocation()));
+                                        Piece pawn = checkWhiteEnPassantRightsSlow(pieces);
+                                        {
+                                            possiblePositions.add(new PositionHolder(new Grid(grid), MoveUtils.getEnPassantText(white, previousTile, blackPawn)));
+                                        }
                                         if (pawn != null) {
                                             pawn.setJustMadeDoubleJump(true);
                                         }
@@ -545,6 +567,7 @@ public final class AI {
                                 grid.setProtections(pieces);
                             }
                         }
+                        Tester.check(grid, clonedGrid, pieces, clonedPieces);
                     }
                 }
 
@@ -556,29 +579,34 @@ public final class AI {
                     List<Tile> moveTiles = white.getMoveTiles(grid);
                     for (int index = (moveTiles.size() - 1); index >= 0; --index) {
                         Tile moveTile = moveTiles.get(index);
-                        previousTile.removeOccupant();
                         if (white.isPawn() && previousRow == 1) {
-                            Queen replace = Pawn.promote(white);
-                            moveTile.setOccupant(replace);
-                            int pawnIndex = pieces.indexOf(white);
-                            pieces.set(pawnIndex, replace);
-                            grid.setProtections(pieces);
-                            if (!whiteKing.inCheck(grid)) {
-                                replace.increaseMoveCount();
-                                {
-                                    Piece pawn = Pieces.checkWhiteEnPassantRights(pieces);
-                                    possiblePositions.add(new PositionHolder(new Grid(grid), "White Pawn at " + previousTile.getNotationLocation() + " has moved to " + replace.getNotationLocation() + " and has been promoted to a White Queen."));
-                                    if (pawn != null) {
-                                        pawn.setJustMadeDoubleJump(true);
+                            //Queen replace = Pawn.promote(white);
+                            for (Piece replace : Pawn.getPromoted(white)) {
+                                previousTile.removeOccupant();
+                                moveTile.setOccupant(replace);
+                                int pawnIndex = pieces.indexOf(white);
+                                pieces.set(pawnIndex, replace);
+                                grid.setProtections(pieces);
+                                if (!whiteKing.inCheck(grid)) {
+                                    replace.increaseMoveCount();
+                                    {
+                                        Piece pawn = checkWhiteEnPassantRightsSlow(pieces);
+                                        {
+                                            possiblePositions.add(new PositionHolder(new Grid(grid), MoveUtils.getPromotedMoveText(white, previousTile, replace)));
+                                        }
+                                        if (pawn != null) {
+                                            pawn.setJustMadeDoubleJump(true);
+                                        }
                                     }
                                 }
+                                previousTile.setOccupant(white);
+                                moveTile.removeOccupant();
+                                pieces.set(pawnIndex, white);
+                                grid.setProtections(pieces);
                             }
-                            previousTile.setOccupant(white);
-                            moveTile.removeOccupant();
-                            pieces.set(pawnIndex, white);
-                            grid.setProtections(pieces);
                         }
                         else {
+                            previousTile.removeOccupant();
                             moveTile.setOccupant(white);
                             grid.setProtections(pieces);
                             if (!whiteKing.inCheck(grid)) {
@@ -590,8 +618,10 @@ public final class AI {
                                 }
                                 white.increaseMoveCount();
                                 {
-                                    Piece pawn = Pieces.checkWhiteEnPassantRights(pieces);
-                                    possiblePositions.add(new PositionHolder(new Grid(grid), white.getName() + " at " + previousTile.getNotationLocation() + " has moved to " + white.getNotationLocation()));
+                                    Piece pawn = checkWhiteEnPassantRightsSlow(pieces);
+                                    {
+                                        possiblePositions.add(new PositionHolder(new Grid(grid), MoveUtils.getMoveText(white, previousTile)));
+                                    }
                                     if (pawn != null) {
                                         pawn.setJustMadeDoubleJump(true);
                                     }
@@ -620,11 +650,11 @@ public final class AI {
             list.clear();
 
             final int numberOfPositions = possiblePositions.size();
-            
+
             if (numberOfPositions != Tester.perft(grid, 1, !side)) {
                 throw new InternalError();
             }
-            
+
             System.out.println("Number of positions from given position: " + numberOfPositions);
 
             if (numberOfPositions == 0) {
@@ -832,6 +862,7 @@ public final class AI {
         }
         else {
             System.out.println("Black AI Playing");
+            //black move generation
             {
                 final List<Piece> blacks = Pieces.getBlack(pieces);
                 final King blackKing = Pieces.getBlackKing(blacks);
@@ -854,8 +885,10 @@ public final class AI {
                             blackKing.increaseMoveCount();
                             leftRook.increaseMoveCount();
                             {
-                                Piece pawn = Pieces.checkBlackEnPassantRights(pieces);
-                                possiblePositions.add(new PositionHolder(new Grid(grid), "Black King castles left from " + previousTile.getNotationLocation() + " to " + blackKing.getNotationLocation() + " and the Black Rook at [8,A] has moved to [8,D]."));
+                                Piece pawn = checkBlackEnPassantRightsSlow(pieces);
+                                {
+                                    possiblePositions.add(new PositionHolder(new Grid(grid), MoveUtils.getCastleText(blackKing, previousTile, leftRook, leftRookTile)));
+                                }
                                 if (pawn != null) {
                                     pawn.setJustMadeDoubleJump(true);
                                 }
@@ -883,8 +916,10 @@ public final class AI {
                             blackKing.increaseMoveCount();
                             rightRook.increaseMoveCount();
                             {
-                                Piece pawn = Pieces.checkBlackEnPassantRights(pieces);
-                                possiblePositions.add(new PositionHolder(new Grid(grid), "Black King castles right from " + previousTile.getNotationLocation() + " to " + blackKing.getNotationLocation() + " and the Black Rook at [8,H] has moved to [8,F]."));
+                                Piece pawn = checkBlackEnPassantRightsSlow(pieces);
+                                {
+                                    possiblePositions.add(new PositionHolder(new Grid(grid), MoveUtils.getCastleText(blackKing, previousTile, rightRook, rightRookTile)));
+                                }
                                 if (pawn != null) {
                                     pawn.setJustMadeDoubleJump(true);
                                 }
@@ -911,39 +946,50 @@ public final class AI {
                     for (int index = (attackTiles.size() - 1); index >= 0; --index) {
                         Tile attackTile = attackTiles.get(index);
                         Piece enemy = attackTile.getOccupant();
-                        previousTile.removeOccupant();
+                        if (enemy.isKing()) {
+                            System.out.println("Enemy King targeted!");
+                            continue;
+                        }
                         if (black.isPawn() && previousRow == 6) {
-                            Queen replace = Pawn.promote(black);
-                            attackTile.setOccupant(replace);
-                            int pawnIndex = pieces.indexOf(black);
-                            pieces.set(pawnIndex, replace);
-                            int removeIndex = Pieces.remove(pieces, enemy);
-                            grid.setProtections(pieces);
-                            if (!blackKing.inCheck(grid)) {
-                                replace.increaseMoveCount();
-                                {
-                                    Piece pawn = Pieces.checkBlackEnPassantRights(pieces);
-                                    possiblePositions.add(new PositionHolder(new Grid(grid), "Black Pawn at " + previousTile.getNotationLocation() + " has captured " + enemy.getName() + " at " + replace.getNotationLocation() + " and has been promoted to a Black Queen."));
-                                    if (pawn != null) {
-                                        pawn.setJustMadeDoubleJump(true);
+                            //Queen replace = Pawn.promote(black);
+                            for (Piece replace : Pawn.getPromoted(black)) {
+                                previousTile.removeOccupant();
+                                attackTile.setOccupant(replace);
+                                int pawnIndex = pieces.indexOf(black);
+                                pieces.set(pawnIndex, replace);
+                                int removeIndex = Pieces.remove(pieces, enemy);
+                                grid.setProtections(pieces);
+                                if (!blackKing.inCheck(grid)) {
+                                    replace.increaseMoveCount();
+                                    {
+                                        Piece pawn = checkBlackEnPassantRightsSlow(pieces);
+                                        {
+                                            possiblePositions.add(new PositionHolder(new Grid(grid), MoveUtils.getCapturePromotedText(black, previousTile, replace, enemy)));
+                                        }
+                                        if (pawn != null) {
+                                            pawn.setJustMadeDoubleJump(true);
+                                        }
                                     }
                                 }
+                                previousTile.setOccupant(black);
+                                attackTile.setOccupant(enemy);
+                                pieces.add(removeIndex, enemy);
+                                pieces.set(pawnIndex, black);
+                                grid.setProtections(pieces);
                             }
-                            previousTile.setOccupant(black);
-                            attackTile.setOccupant(enemy);
-                            pieces.add(removeIndex, enemy);
-                            pieces.set(pawnIndex, black);
-                            grid.setProtections(pieces);
                         }
                         else {
+                            previousTile.removeOccupant();
                             attackTile.setOccupant(black);
                             int removeIndex = Pieces.remove(pieces, enemy);
                             grid.setProtections(pieces);
                             if (!blackKing.inCheck(grid)) {
                                 black.increaseMoveCount();
                                 {
-                                    Piece pawn = Pieces.checkBlackEnPassantRights(pieces);
-                                    possiblePositions.add(new PositionHolder(new Grid(grid), black.getName() + " at " + previousTile.getNotationLocation() + " has captured " + enemy.getName() + " at " + black.getNotationLocation()));
+                                    Piece pawn = checkBlackEnPassantRightsSlow(pieces);
+                                    {
+                                        possiblePositions.add(new PositionHolder(new Grid(grid), MoveUtils.getCaptureText(black, previousTile, enemy)));
+                                    }
                                     if (pawn != null) {
                                         pawn.setJustMadeDoubleJump(true);
                                     }
@@ -971,8 +1017,10 @@ public final class AI {
                                 if (!blackKing.inCheck(grid)) {
                                     black.increaseMoveCount();
                                     {
-                                        Piece pawn = Pieces.checkBlackEnPassantRights(pieces);
-                                        possiblePositions.add(new PositionHolder(new Grid(grid), "Black Pawn at " + previousTile.getNotationLocation() + " performed enpassant capture on the Black Pawn at " + whitePawn.getNotationLocation() + " and has moved from " + previousTile.getNotationLocation() + " to " + black.getNotationLocation()));
+                                        Piece pawn = checkBlackEnPassantRightsSlow(pieces);
+                                        {
+                                            possiblePositions.add(new PositionHolder(new Grid(grid), MoveUtils.getEnPassantText(black, previousTile, whitePawn)));
+                                        }
                                         if (pawn != null) {
                                             pawn.setJustMadeDoubleJump(true);
                                         }
@@ -999,8 +1047,10 @@ public final class AI {
                                 if (!blackKing.inCheck(grid)) {
                                     black.increaseMoveCount();
                                     {
-                                        Piece pawn = Pieces.checkBlackEnPassantRights(pieces);
-                                        possiblePositions.add(new PositionHolder(new Grid(grid), "Black Pawn at " + previousTile.getNotationLocation() + " performed enpassant capture on the Black Pawn at " + whitePawn.getNotationLocation() + " and has moved from " + previousTile.getNotationLocation() + " to " + black.getNotationLocation()));
+                                        Piece pawn = checkBlackEnPassantRightsSlow(pieces);
+                                        {
+                                            possiblePositions.add(new PositionHolder(new Grid(grid), MoveUtils.getEnPassantText(black, previousTile, whitePawn)));
+                                        }
                                         if (pawn != null) {
                                             pawn.setJustMadeDoubleJump(true);
                                         }
@@ -1026,32 +1076,39 @@ public final class AI {
                     List<Tile> moveTiles = black.getMoveTiles(grid);
                     for (int index = (moveTiles.size() - 1); index >= 0; --index) {
                         Tile moveTile = moveTiles.get(index);
-                        previousTile.removeOccupant();
                         if (black.isPawn() && previousRow == 6) {
-                            Queen replace = Pawn.promote(black);
-                            moveTile.setOccupant(replace);
-                            int pawnIndex = pieces.indexOf(black);
-                            pieces.set(pawnIndex, replace);
-                            grid.setProtections(pieces);
-                            if (!blackKing.inCheck(grid)) {
-                                replace.increaseMoveCount();
-                                {
-                                    Piece pawn = Pieces.checkBlackEnPassantRights(pieces);
-                                    possiblePositions.add(new PositionHolder(new Grid(grid), "Black Pawn at " + previousTile.getNotationLocation() + " has moved to " + replace.getNotationLocation() + " and has been promoted to a Black Queen."));
-                                    if (pawn != null) {
-                                        pawn.setJustMadeDoubleJump(true);
+                            //Queen replace = Pawn.promote(black);
+                            for (Piece replace : Pawn.getPromoted(black)) {
+                                previousTile.removeOccupant();
+                                moveTile.setOccupant(replace);
+                                int pawnIndex = pieces.indexOf(black);
+                                pieces.set(pawnIndex, replace);
+                                grid.setProtections(pieces);
+                                if (!blackKing.inCheck(grid)) {
+                                    replace.increaseMoveCount();
+                                    {
+                                        Piece pawn = checkBlackEnPassantRightsSlow(pieces);
+                                        {
+                                            possiblePositions.add(new PositionHolder(new Grid(grid), MoveUtils.getPromotedMoveText(black, previousTile, replace)));
+                                        }
+                                        if (pawn != null) {
+                                            pawn.setJustMadeDoubleJump(true);
+                                        }
                                     }
                                 }
+                                previousTile.setOccupant(black);
+                                moveTile.removeOccupant();
+                                pieces.set(pawnIndex, black);
+                                grid.setProtections(pieces);
                             }
-                            previousTile.setOccupant(black);
-                            moveTile.removeOccupant();
-                            pieces.set(pawnIndex, black);
-                            grid.setProtections(pieces);
                         }
                         else {
+                            previousTile.removeOccupant();
                             moveTile.setOccupant(black);
                             grid.setProtections(pieces);
                             if (!blackKing.inCheck(grid)) {
+                                //see if this pawn has made a double jump
+                                //this is for enpassant purposes
                                 boolean madeDoubleJump = false;
                                 if (black.isPawn() && !black.hasMoved()) {
                                     if (black.getRow() == 3) {
@@ -1060,8 +1117,10 @@ public final class AI {
                                 }
                                 black.increaseMoveCount();
                                 {
-                                    Piece pawn = Pieces.checkBlackEnPassantRights(pieces);
-                                    possiblePositions.add(new PositionHolder(new Grid(grid), black.getName() + " at " + previousTile.getNotationLocation() + " has moved to " + black.getNotationLocation()));
+                                    Piece pawn = checkBlackEnPassantRightsSlow(pieces);
+                                    {
+                                        possiblePositions.add(new PositionHolder(new Grid(grid), MoveUtils.getMoveText(black, previousTile)));
+                                    }
                                     if (pawn != null) {
                                         pawn.setJustMadeDoubleJump(true);
                                     }
@@ -1090,11 +1149,11 @@ public final class AI {
             list.clear();
 
             final int numberOfPositions = possiblePositions.size();
-            
+
             if (numberOfPositions != Tester.perft(grid, 1, !side)) {
                 throw new InternalError();
             }
-            
+
             System.out.println("Number of positions from given position: " + numberOfPositions);
 
             if (numberOfPositions == 0) {
@@ -1363,15 +1422,15 @@ public final class AI {
         void setFinishedDepth(int num) {
             view.depth = num;
         }
-        
+
         void setTotalMoves(int totalMoves) {
             view.totalMoves = totalMoves;
         }
-        
+
         void setMovesCompleted(int movesCompleted) {
             view.movesCompleted = movesCompleted;
         }
-        
+
         void increaseMovesCompleted() {
             ++view.movesCompleted;
         }
@@ -1439,16 +1498,14 @@ public final class AI {
                     String line = data[index];
                     offscreenGraphics.drawString(line, 0, textHeight += Constants.getStringHeight(line, font, offscreenFontRenderContext));
                 }
-                
-                
+
                 int approximateTextHeight = (int) Math.ceil(textHeight);
-                
+
                 offscreenGraphics.setColor(Color.WHITE);
                 offscreenGraphics.fillRect(0, approximateTextHeight, width, 15);
                 offscreenGraphics.setColor(Color.GREEN);
                 offscreenGraphics.fillRect(0, approximateTextHeight, (int) (width * ((1.0 * movesCompleted) / (1.0 * totalMoves))), 15);
-                
-                
+
                 //offscreenGraphics.drawLine(0, approximateTextHeight, width, approximateTextHeight);
                 offscreenGraphics.drawImage(IMAGE, 0, approximateTextHeight + 15, width, height - approximateTextHeight, this);
                 window.drawImage(offscreenBuffer, 0, 0, this);

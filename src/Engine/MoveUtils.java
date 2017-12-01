@@ -4,11 +4,35 @@ import java.util.List;
 
 //class designed to simplify move testing and searching
 public final class MoveUtils {
-    
+
     private MoveUtils() {
-        
+
+    }
+
+    public static String getMoveText(Piece piece, Tile previousTile) {
+        return piece.getName() + " at " + previousTile.getNotationLocation() + " has moved to " + piece.getNotationLocation();
+    }
+
+    public static String getPromotedMoveText(Piece pawn, Tile previousTile, Piece promoted) {
+        return getMoveText(pawn, previousTile) + " and has been promoted to a " + promoted.getName();
     }
     
+    public static String getCaptureText(Piece piece, Tile previousTile, Piece enemy){
+        return piece.getName() + " at " + previousTile.getNotationLocation() + " has captured " + enemy.getName() + " at " + piece.getNotationLocation();                              
+    }
+    
+    public static String getCapturePromotedText(Piece pawn, Tile previousTile, Piece promoted, Piece enemy) {
+        return getCaptureText(pawn, previousTile, enemy) + " and has been promoted to a " + promoted.getName();                           
+    }
+    
+    public static String getEnPassantText(Piece pawn, Tile previousTile, Piece enemyPawn) {
+        return pawn.getName() + " at " + previousTile.getNotationLocation() + " performed enpassant capture on the " + enemyPawn.getName() + " at " + enemyPawn.getNotationLocation() + " and has moved to " + pawn.getNotationLocation();    
+    }
+    
+    public static String getCastleText(King king, Tile previousTile, Piece rook, Tile previousRookTile) {
+        return king.getName() + " castles from " + previousTile.getNotationLocation() + " to " + king.getNotationLocation() + " and the " + getMoveText(rook, previousRookTile);                           
+    }
+
     //move functions
     public static void doMove(Grid grid, List<Piece> whites, List<Piece> blacks, Tile moveTile, Tile previousTile) {
         Piece piece = previousTile.getOccupant();

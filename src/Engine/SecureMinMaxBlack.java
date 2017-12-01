@@ -8,7 +8,7 @@ import java.util.List;
 
 final class SecureMinMaxBlack {
 
-    private static final boolean CHECK_MODE = true;
+    private static final boolean CHECK_MODE = !true;
     private static long PERFT_COUNTER;
     
     static {
@@ -30,20 +30,21 @@ final class SecureMinMaxBlack {
 
     /**
      * Minimizing component of the Min-Max search function seeking to reduce
-     * Black's score as much as possible. This component implements White's
+     * Black's score by as much as possible. This method implements White's
      * moves.
      *
      * @param board The chess board.
      * @param depth Number of ply to search ahead.
-     * @return The least possible score to reduce White's score as much as
-     * possible. This score may be extremely high, indicating that White is
-     * losing or is about to be checkmated.
+     * @return The least possible score to reduce Black's score as much as
+     * possible. This score may be extremely high, indicating that Black is
+     * wining or that White is about to be checkmated by Black.
      */
+    //pick lowest of the max (worst enemy-Black can do)
     static int min(final Board board, int depth) {
         final Grid grid = board.grid;
         final List<Piece> whites = board.whites;
         final List<Piece> blacks = board.blacks;
-        
+
         if (depth == 0) {
             ++PERFT_COUNTER;
             return Evaluator.evaluateInBlackPerspective(grid, whites, blacks);
@@ -89,12 +90,14 @@ final class SecureMinMaxBlack {
                     leftRook.increaseMoveCount();
                     {
                         Piece pawn = Pieces.checkWhiteEnPassantRights(blacks);
-                        int result = max(board, depth);
+                        {
+                            int result = max(board, depth);
+                            if (result < min) {
+                                min = result;
+                            }
+                        }
                         if (pawn != null) {
                             pawn.setJustMadeDoubleJump(true);
-                        }
-                        if (result < min) {
-                            min = result;
                         }
                     }
                     whiteKing.decreaseMoveCount();
@@ -121,12 +124,14 @@ final class SecureMinMaxBlack {
                     rightRook.increaseMoveCount();
                     {
                         Piece pawn = Pieces.checkWhiteEnPassantRights(blacks);
-                        int result = max(board, depth);
+                        {
+                            int result = max(board, depth);
+                            if (result < min) {
+                                min = result;
+                            }
+                        }
                         if (pawn != null) {
                             pawn.setJustMadeDoubleJump(true);
-                        }
-                        if (result < min) {
-                            min = result;
                         }
                     }
                     whiteKing.decreaseMoveCount();
@@ -160,34 +165,38 @@ final class SecureMinMaxBlack {
                 if (enemy.isKing()) {
                     continue;
                 }
-                previousTile.removeOccupant();
                 if (white.isPawn() && previousRow == 1) {
-                    Queen replace = Pawn.promote(white);
-                    attackTile.setOccupant(replace);
-                    int pawnIndex = whites.indexOf(white);
-                    whites.set(pawnIndex, replace);
-                    int removeIndex = Pieces.remove(blacks, enemy);
-                    grid.setProtections(whites, blacks);
-                    if (!whiteKing.inCheck(grid)) {
-                        replace.increaseMoveCount();
-                        {
-                            Piece pawn = Pieces.checkWhiteEnPassantRights(blacks);
-                            int result = max(board, depth);
-                            if (pawn != null) {
-                                pawn.setJustMadeDoubleJump(true);
-                            }
-                            if (result < min) {
-                                min = result;
+                    for (Piece replace : Pawn.getPromoted(white)) {
+                        previousTile.removeOccupant();
+                        attackTile.setOccupant(replace);
+                        int pawnIndex = whites.indexOf(white);
+                        whites.set(pawnIndex, replace);
+                        int removeIndex = Pieces.remove(blacks, enemy);
+                        grid.setProtections(whites, blacks);
+                        if (!whiteKing.inCheck(grid)) {
+                            replace.increaseMoveCount();
+                            {
+                                Piece pawn = Pieces.checkWhiteEnPassantRights(blacks);
+                                {
+                                    int result = max(board, depth);
+                                    if (result < min) {
+                                        min = result;
+                                    }
+                                }
+                                if (pawn != null) {
+                                    pawn.setJustMadeDoubleJump(true);
+                                }
                             }
                         }
+                        previousTile.setOccupant(white);
+                        attackTile.setOccupant(enemy);
+                        whites.set(pawnIndex, white);
+                        blacks.add(removeIndex, enemy);
+                        grid.setProtections(whites, blacks);
                     }
-                    previousTile.setOccupant(white);
-                    attackTile.setOccupant(enemy);
-                    whites.set(pawnIndex, white);
-                    blacks.add(removeIndex, enemy);
-                    grid.setProtections(whites, blacks);
                 }
                 else {
+                    previousTile.removeOccupant();
                     attackTile.setOccupant(white);
                     int removeIndex = Pieces.remove(blacks, enemy);
                     grid.setProtections(whites, blacks);
@@ -195,12 +204,14 @@ final class SecureMinMaxBlack {
                         white.increaseMoveCount();
                         {
                             Piece pawn = Pieces.checkWhiteEnPassantRights(blacks);
-                            int result = max(board, depth);
+                            {
+                                int result = max(board, depth);
+                                if (result < min) {
+                                    min = result;
+                                }
+                            }
                             if (pawn != null) {
                                 pawn.setJustMadeDoubleJump(true);
-                            }
-                            if (result < min) {
-                                min = result;
                             }
                         }
                         white.decreaseMoveCount();
@@ -231,12 +242,14 @@ final class SecureMinMaxBlack {
                             white.increaseMoveCount();
                             {
                                 Piece pawn = Pieces.checkWhiteEnPassantRights(blacks);
-                                int result = max(board, depth);
+                                {
+                                    int result = max(board, depth);
+                                    if (result < min) {
+                                        min = result;
+                                    }
+                                }
                                 if (pawn != null) {
                                     pawn.setJustMadeDoubleJump(true);
-                                }
-                                if (result < min) {
-                                    min = result;
                                 }
                             }
                             white.decreaseMoveCount();
@@ -262,12 +275,14 @@ final class SecureMinMaxBlack {
                             white.increaseMoveCount();
                             {
                                 Piece pawn = Pieces.checkWhiteEnPassantRights(blacks);
-                                int result = max(board, depth);
+                                {
+                                    int result = max(board, depth);
+                                    if (result < min) {
+                                        min = result;
+                                    }
+                                }
                                 if (pawn != null) {
                                     pawn.setJustMadeDoubleJump(true);
-                                }
-                                if (result < min) {
-                                    min = result;
                                 }
                             }
                             white.decreaseMoveCount();
@@ -290,32 +305,36 @@ final class SecureMinMaxBlack {
             final List<Tile> moveTiles = white.getMoveTiles(grid);
             for (int index = (moveTiles.size() - 1); index >= 0; --index) {
                 Tile moveTile = moveTiles.get(index);
-                previousTile.removeOccupant();
                 if (white.isPawn() && previousRow == 1) {
-                    Queen replace = Pawn.promote(white);
-                    moveTile.setOccupant(replace);
-                    int pawnIndex = whites.indexOf(white);
-                    whites.set(pawnIndex, replace);
-                    grid.setProtections(whites, blacks);
-                    if (!whiteKing.inCheck(grid)) {
-                        replace.increaseMoveCount();
-                        {
-                            Piece pawn = Pieces.checkWhiteEnPassantRights(blacks);
-                            int result = max(board, depth);
-                            if (pawn != null) {
-                                pawn.setJustMadeDoubleJump(true);
-                            }
-                            if (result < min) {
-                                min = result;
+                    for (Piece replace : Pawn.getPromoted(white)) {
+                        previousTile.removeOccupant();
+                        moveTile.setOccupant(replace);
+                        int pawnIndex = whites.indexOf(white);
+                        whites.set(pawnIndex, replace);
+                        grid.setProtections(whites, blacks);
+                        if (!whiteKing.inCheck(grid)) {
+                            replace.increaseMoveCount();
+                            {
+                                Piece pawn = Pieces.checkWhiteEnPassantRights(blacks);
+                                {
+                                    int result = max(board, depth);
+                                    if (result < min) {
+                                        min = result;
+                                    }
+                                }
+                                if (pawn != null) {
+                                    pawn.setJustMadeDoubleJump(true);
+                                }
                             }
                         }
+                        previousTile.setOccupant(white);
+                        moveTile.removeOccupant();
+                        whites.set(pawnIndex, white);
+                        grid.setProtections(whites, blacks);
                     }
-                    previousTile.setOccupant(white);
-                    moveTile.removeOccupant();
-                    whites.set(pawnIndex, white);
-                    grid.setProtections(whites, blacks);
                 }
                 else {
+                    previousTile.removeOccupant();
                     moveTile.setOccupant(white);
                     grid.setProtections(whites, blacks);
                     if (!whiteKing.inCheck(grid)) {
@@ -328,12 +347,14 @@ final class SecureMinMaxBlack {
                         white.increaseMoveCount();
                         {
                             Piece pawn = Pieces.checkWhiteEnPassantRights(blacks);
-                            int result = max(board, depth);
+                            {
+                                int result = max(board, depth);
+                                if (result < min) {
+                                    min = result;
+                                }
+                            }
                             if (pawn != null) {
                                 pawn.setJustMadeDoubleJump(true);
-                            }
-                            if (result < min) {
-                                min = result;
                             }
                         }
                         white.decreaseMoveCount();
@@ -363,22 +384,24 @@ final class SecureMinMaxBlack {
     }
 
     /**
-     * Maximizing component of the Min-Max search function. This component seeks
-     * to increase Black's score as much as possible.
+     * Maximizing component of the Min-Max search function seeking to increase
+     * Black's score by as much as possible. This method implements Black's
+     * moves.
      *
      * @param grid The chess board.
      * @param whites The white pieces on the chess board.
      * @param blacks The black pieces on the chess board.
      * @param depth Number of ply to search ahead.
-     * @return The greatest possible score to increase White's score as much as
+     * @return The greatest possible score to increase Black's score by as much as
      * possible. This score may be extremely low, indicating that Black is
      * losing or is about to be checkmated.
      */
+    //pick highest of the min (aka worst enemy-white can do)
     static int max(final Board board, int depth) {
         final Grid grid = board.grid;
         final List<Piece> whites = board.whites;
         final List<Piece> blacks = board.blacks;
-        
+
         if (depth == 0) {
             ++PERFT_COUNTER;
             return Evaluator.evaluateInBlackPerspective(grid, whites, blacks);
@@ -424,9 +447,11 @@ final class SecureMinMaxBlack {
                     leftRook.increaseMoveCount();
                     {
                         Piece pawn = Pieces.checkBlackEnPassantRights(whites);
-                        int result = min(board, depth);
-                        if (result > max) {
-                            max = result;
+                        {
+                            int result = min(board, depth);
+                            if (result > max) {
+                                max = result;
+                            }
                         }
                         if (pawn != null) {
                             pawn.setJustMadeDoubleJump(true);
@@ -456,9 +481,11 @@ final class SecureMinMaxBlack {
                     rightRook.increaseMoveCount();
                     {
                         Piece pawn = Pieces.checkBlackEnPassantRights(whites);
-                        int result = min(board, depth);
-                        if (result > max) {
-                            max = result;
+                        {
+                            int result = min(board, depth);
+                            if (result > max) {
+                                max = result;
+                            }
                         }
                         if (pawn != null) {
                             pawn.setJustMadeDoubleJump(true);
@@ -495,34 +522,38 @@ final class SecureMinMaxBlack {
                 if (enemy.isKing()) {
                     continue;
                 }
-                previousTile.removeOccupant();
                 if (black.isPawn() && previousRow == 6) {
-                    Queen replace = Pawn.promote(black);
-                    attackTile.setOccupant(replace);
-                    int pawnIndex = blacks.indexOf(black);
-                    blacks.set(pawnIndex, replace);
-                    int removeIndex = Pieces.remove(whites, enemy);
-                    grid.setProtections(whites, blacks);
-                    if (!blackKing.inCheck(grid)) {
-                        replace.increaseMoveCount();
-                        {
-                            Piece pawn = Pieces.checkBlackEnPassantRights(whites);
-                            int result = min(board, depth);
-                            if (result > max) {
-                                max = result;
-                            }
-                            if (pawn != null) {
-                                pawn.setJustMadeDoubleJump(true);
+                    for (Piece replace : Pawn.getPromoted(black)) {
+                        previousTile.removeOccupant();
+                        attackTile.setOccupant(replace);
+                        int pawnIndex = blacks.indexOf(black);
+                        blacks.set(pawnIndex, replace);
+                        int removeIndex = Pieces.remove(whites, enemy);
+                        grid.setProtections(whites, blacks);
+                        if (!blackKing.inCheck(grid)) {
+                            replace.increaseMoveCount();
+                            {
+                                Piece pawn = Pieces.checkBlackEnPassantRights(whites);
+                                {
+                                    int result = min(board, depth);
+                                    if (result > max) {
+                                        max = result;
+                                    }
+                                }
+                                if (pawn != null) {
+                                    pawn.setJustMadeDoubleJump(true);
+                                }
                             }
                         }
+                        previousTile.setOccupant(black);
+                        attackTile.setOccupant(enemy);
+                        blacks.set(pawnIndex, black);
+                        whites.add(removeIndex, enemy);
+                        grid.setProtections(whites, blacks);
                     }
-                    previousTile.setOccupant(black);
-                    attackTile.setOccupant(enemy);
-                    blacks.set(pawnIndex, black);
-                    whites.add(removeIndex, enemy);
-                    grid.setProtections(whites, blacks);
                 }
                 else {
+                    previousTile.removeOccupant();
                     attackTile.setOccupant(black);
                     int removeIndex = Pieces.remove(whites, enemy);
                     grid.setProtections(whites, blacks);
@@ -530,9 +561,11 @@ final class SecureMinMaxBlack {
                         black.increaseMoveCount();
                         {
                             Piece pawn = Pieces.checkBlackEnPassantRights(whites);
-                            int result = min(board, depth);
-                            if (result > max) {
-                                max = result;
+                            {
+                                int result = min(board, depth);
+                                if (result > max) {
+                                    max = result;
+                                }
                             }
                             if (pawn != null) {
                                 pawn.setJustMadeDoubleJump(true);
@@ -566,9 +599,11 @@ final class SecureMinMaxBlack {
                             black.increaseMoveCount();
                             {
                                 Piece pawn = Pieces.checkBlackEnPassantRights(whites);
-                                int result = min(board, depth);
-                                if (result > max) {
-                                    max = result;
+                                {
+                                    int result = min(board, depth);
+                                    if (result > max) {
+                                        max = result;
+                                    }
                                 }
                                 if (pawn != null) {
                                     pawn.setJustMadeDoubleJump(true);
@@ -597,9 +632,11 @@ final class SecureMinMaxBlack {
                             black.increaseMoveCount();
                             {
                                 Piece pawn = Pieces.checkBlackEnPassantRights(whites);
-                                int result = min(board, depth);
-                                if (result > max) {
-                                    max = result;
+                                {
+                                    int result = min(board, depth);
+                                    if (result > max) {
+                                        max = result;
+                                    }
                                 }
                                 if (pawn != null) {
                                     pawn.setJustMadeDoubleJump(true);
@@ -625,32 +662,36 @@ final class SecureMinMaxBlack {
             final List<Tile> moveTiles = black.getMoveTiles(grid);
             for (int index = (moveTiles.size() - 1); index >= 0; --index) {
                 Tile moveTile = moveTiles.get(index);
-                previousTile.removeOccupant();
                 if (black.isPawn() && previousRow == 6) {
-                    Queen replace = Pawn.promote(black);
-                    moveTile.setOccupant(replace);
-                    int pawnIndex = blacks.indexOf(black);
-                    blacks.set(pawnIndex, replace);
-                    grid.setProtections(whites, blacks);
-                    if (!blackKing.inCheck(grid)) {
-                        replace.increaseMoveCount();
-                        {
-                            Piece pawn = Pieces.checkBlackEnPassantRights(whites);
-                            int result = min(board, depth);
-                            if (result > max) {
-                                max = result;
-                            }
-                            if (pawn != null) {
-                                pawn.setJustMadeDoubleJump(true);
+                    for (Piece replace : Pawn.getPromoted(black)) {
+                        previousTile.removeOccupant();
+                        moveTile.setOccupant(replace);
+                        int pawnIndex = blacks.indexOf(black);
+                        blacks.set(pawnIndex, replace);
+                        grid.setProtections(whites, blacks);
+                        if (!blackKing.inCheck(grid)) {
+                            replace.increaseMoveCount();
+                            {
+                                Piece pawn = Pieces.checkBlackEnPassantRights(whites);
+                                {
+                                    int result = min(board, depth);
+                                    if (result > max) {
+                                        max = result;
+                                    }
+                                }
+                                if (pawn != null) {
+                                    pawn.setJustMadeDoubleJump(true);
+                                }
                             }
                         }
+                        previousTile.setOccupant(black);
+                        moveTile.removeOccupant();
+                        blacks.set(pawnIndex, black);
+                        grid.setProtections(whites, blacks);
                     }
-                    previousTile.setOccupant(black);
-                    moveTile.removeOccupant();
-                    blacks.set(pawnIndex, black);
-                    grid.setProtections(whites, blacks);
                 }
                 else {
+                    previousTile.removeOccupant();
                     moveTile.setOccupant(black);
                     grid.setProtections(whites, blacks);
                     if (!blackKing.inCheck(grid)) {
@@ -663,9 +704,11 @@ final class SecureMinMaxBlack {
                         black.increaseMoveCount();
                         {
                             Piece pawn = Pieces.checkBlackEnPassantRights(whites);
-                            int result = min(board, depth);
-                            if (result > max) {
-                                max = result;
+                            {
+                                int result = min(board, depth);
+                                if (result > max) {
+                                    max = result;
+                                }
                             }
                             if (pawn != null) {
                                 pawn.setJustMadeDoubleJump(true);

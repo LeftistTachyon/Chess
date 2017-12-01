@@ -1,13 +1,16 @@
 package Engine;
 
+import static Engine.Pieces.checkBlackEnPassantRightsSlow;
+import static Engine.Pieces.checkWhiteEnPassantRightsSlow;
 import Util.ChessConstants;
 import static Util.ChessConstants.LINEAR_LENGTH;
-import Util.Constants;
 import static Util.Constants.NEGATIVE_INFINITY;
 import static Util.Constants.POSITIVE_INFINITY;
+import static Util.Constants.RUNTIME;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 final class Tester {
@@ -27,7 +30,9 @@ final class Tester {
     }
     
     static final void checkGrids(Grid grid1, Grid grid2) {
-        grid1.equals(grid2);
+        if (!grid1.equals(grid2)) {
+            throw new Error();
+        }
     }
     
     static final void checkPieces(List<Piece> list1, List<Piece> list2) {
@@ -49,7 +54,7 @@ final class Tester {
         s = s.replace("White", "Black");
         System.out.println(s);
         
-        System.out.println("Number of Processors: " + Constants.RUNTIME.availableProcessors());
+        System.out.println("Number of Processors: " + RUNTIME.availableProcessors());
         System.out.println();
         
         for (int times = 10; times > 0; --times) {
@@ -74,9 +79,8 @@ final class Tester {
             AI.TIMER = new SearchTimer(10000, "Test");
             new AI(true, 60).useTestDialog();
         }
-
+        
         testStartPosition();
-        testErrorPosition();
         
         //position 5 at https://chessprogramming.wikispaces.com/Perft+Results
         {
@@ -123,7 +127,9 @@ final class Tester {
             testPosition(pieces, false);
         }
         
-        Constants.RUNTIME.exit(0);
+        testErrorPosition();
+        
+        RUNTIME.exit(0);
     }
 
     private static void testStartPosition() {
@@ -272,6 +278,7 @@ final class Tester {
         }
     }
 
+    //false=white, true=black
     private static void testPosition(final List<Piece> pieces, final boolean color) {
         final Grid grid = new Grid();
         final int numberOfPieces = pieces.size();
@@ -312,7 +319,16 @@ final class Tester {
         Grid copiedGrid = new Grid(grid);
         List<Piece> copiedPieces = Pieces.getDeepCopy(pieces);
         for (int depth = 1; depth <= MAX_DEPTH; ++depth) {
-            System.out.println((!color ? "White" : "Black") + " Perft(" + depth + ") Result: " + perft(grid, depth, color));
+            long startTime = System.nanoTime();
+            int score = !color ? SecureMinMaxBlack.min(new Board(new Grid(grid)), depth) : SecureMinMaxBlack.max(new Board(new Grid(grid)), depth);
+            long endTime = System.nanoTime();
+            System.out.println("SecureMinMaxBlack (" + ((!color) ? "Min-White" : "Max-Black") + ") Depth: " + depth + " Score: " + score + " Perft: " + SecureMinMaxBlack.getPerftCounter() + " Took: " + TimeUnit.SECONDS.convert(endTime - startTime, TimeUnit.NANOSECONDS) + " seconds");
+            SecureMinMaxBlack.setPerftCounter(0);            
+        }
+        
+        for (int depth = 1; depth <= MAX_DEPTH; ++depth) {
+            long startTime = System.nanoTime();
+            System.out.println((!color ? "White" : "Black") + " Perft(" + depth + ") Result: " + perft(grid, depth, color) + " Took: " + TimeUnit.SECONDS.convert(System.nanoTime() - startTime, TimeUnit.NANOSECONDS) + " seconds");
         }
 
         check(grid, copiedGrid, pieces, copiedPieces);
@@ -359,51 +375,11 @@ final class Tester {
         grid.setProtections(pieces);
         check(grid, new Grid(grid), pieces, clonedPieces);
     }
-
+    
     //after a player makes a turn that does
     //not capture the enemy pawn that moved up 2 tiles
     //that enemy pawn is now immune from enpassant 
-    /**
-     * Method that should be called immediately after White successfully
-     * finishes his/her turn. If a Black Pawn made a double jump just before
-     * White's last turn, and has not been captured En Passant, it is now
-     * permanently immune from being targeted by En Passant.
-     *
-     * @see checkBlackEnPassantRights()
-     */
-    private static Piece checkWhiteEnPassantRights(List<Piece> pieces) {
-        for (int index = 0, size = pieces.size(); index != size; ++index) {
-            Piece piece = pieces.get(index);
-            if (piece.isPawn() && piece.isBlack()) {
-                if (piece.justMadeDoubleJump()) {
-                    piece.setJustMadeDoubleJump(false);
-                    return piece;
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Method that should be called immediately after Black successfully
-     * finishes his/her turn. If a White Pawn made a double jump just before
-     * Black's last turn, and has not been captured En Passant, it is now
-     * permanently immune from being targeted by En Passant.
-     *
-     * @see checkWhiteEnPassantRights()
-     */
-    private static Piece checkBlackEnPassantRights(List<Piece> pieces) {
-        for (int index = 0, size = pieces.size(); index != size; ++index) {
-            Piece piece = pieces.get(index);
-            if (piece.isPawn() && piece.isWhite()) {
-                if (piece.justMadeDoubleJump()) {
-                    piece.setJustMadeDoubleJump(false);
-                    return piece;
-                }
-            }
-        }
-        return null;
-    }
+    
 
     //improved perft function  
     /**
@@ -458,7 +434,7 @@ final class Tester {
                         blackKing.increaseMoveCount();
                         leftRook.increaseMoveCount();
                         {
-                            Piece pawn = checkBlackEnPassantRights(pieces);
+                            Piece pawn = checkBlackEnPassantRightsSlow(pieces);
                             moves += perft(grid, depth, !color);
                             if (pawn != null) {
                                 pawn.setJustMadeDoubleJump(true);
@@ -487,7 +463,7 @@ final class Tester {
                         blackKing.increaseMoveCount();
                         rightRook.increaseMoveCount();
                         {
-                            Piece pawn = checkBlackEnPassantRights(pieces);
+                            Piece pawn = checkBlackEnPassantRightsSlow(pieces);
                             moves += perft(grid, depth, !color);
                             if (pawn != null) {
                                 pawn.setJustMadeDoubleJump(true);
@@ -531,7 +507,7 @@ final class Tester {
                             if (!blackKing.inCheck(grid)) {
                                 replace.increaseMoveCount();
                                 {
-                                    Piece pawn = checkBlackEnPassantRights(pieces);
+                                    Piece pawn = checkBlackEnPassantRightsSlow(pieces);
                                     moves += perft(grid, depth, !color);
                                     if (pawn != null) {
                                         pawn.setJustMadeDoubleJump(true);
@@ -553,7 +529,7 @@ final class Tester {
                         if (!blackKing.inCheck(grid)) {
                             black.increaseMoveCount();
                             {
-                                Piece pawn = checkBlackEnPassantRights(pieces);
+                                Piece pawn = checkBlackEnPassantRightsSlow(pieces);
                                 moves += perft(grid, depth, !color);
                                 if (pawn != null) {
                                     pawn.setJustMadeDoubleJump(true);
@@ -582,7 +558,7 @@ final class Tester {
                             if (!blackKing.inCheck(grid)) {
                                 black.increaseMoveCount();
                                 {
-                                    Piece pawn = checkBlackEnPassantRights(pieces);
+                                    Piece pawn = checkBlackEnPassantRightsSlow(pieces);
                                     moves += perft(grid, depth, !color);
                                     if (pawn != null) {
                                         pawn.setJustMadeDoubleJump(true);
@@ -610,7 +586,7 @@ final class Tester {
                             if (!blackKing.inCheck(grid)) {
                                 black.increaseMoveCount();
                                 {
-                                    Piece pawn = checkBlackEnPassantRights(pieces);
+                                    Piece pawn = checkBlackEnPassantRightsSlow(pieces);
                                     moves += perft(grid, depth, !color);
                                     if (pawn != null) {
                                         pawn.setJustMadeDoubleJump(true);
@@ -648,7 +624,7 @@ final class Tester {
                             if (!blackKing.inCheck(grid)) {
                                 replace.increaseMoveCount();
                                 {
-                                    Piece pawn = checkBlackEnPassantRights(pieces);
+                                    Piece pawn = checkBlackEnPassantRightsSlow(pieces);
                                     moves += perft(grid, depth, !color);
                                     if (pawn != null) {
                                         pawn.setJustMadeDoubleJump(true);
@@ -676,7 +652,7 @@ final class Tester {
                             }
                             black.increaseMoveCount();
                             {
-                                Piece pawn = checkBlackEnPassantRights(pieces);
+                                Piece pawn = checkBlackEnPassantRightsSlow(pieces);
                                 moves += perft(grid, depth, !color);
                                 if (pawn != null) {
                                     pawn.setJustMadeDoubleJump(true);
@@ -721,7 +697,7 @@ final class Tester {
                         whiteKing.increaseMoveCount();
                         leftRook.increaseMoveCount();
                         {
-                            Piece pawn = checkWhiteEnPassantRights(pieces);
+                            Piece pawn = checkWhiteEnPassantRightsSlow(pieces);
                             moves += perft(grid, depth, !color);
                             if (pawn != null) {
                                 pawn.setJustMadeDoubleJump(true);
@@ -750,7 +726,7 @@ final class Tester {
                         whiteKing.increaseMoveCount();
                         rightRook.increaseMoveCount();
                         {
-                            Piece pawn = checkWhiteEnPassantRights(pieces);
+                            Piece pawn = checkWhiteEnPassantRightsSlow(pieces);
                             moves += perft(grid, depth, !color);
                             if (pawn != null) {
                                 pawn.setJustMadeDoubleJump(true);
@@ -794,7 +770,7 @@ final class Tester {
                             if (!whiteKing.inCheck(grid)) {
                                 replace.increaseMoveCount();
                                 {
-                                    Piece pawn = checkWhiteEnPassantRights(pieces);
+                                    Piece pawn = checkWhiteEnPassantRightsSlow(pieces);
                                     moves += perft(grid, depth, !color);
                                     if (pawn != null) {
                                         pawn.setJustMadeDoubleJump(true);
@@ -816,7 +792,7 @@ final class Tester {
                         if (!whiteKing.inCheck(grid)) {
                             white.increaseMoveCount();
                             {
-                                Piece pawn = checkWhiteEnPassantRights(pieces);
+                                Piece pawn = checkWhiteEnPassantRightsSlow(pieces);
                                 moves += perft(grid, depth, !color);
                                 if (pawn != null) {
                                     pawn.setJustMadeDoubleJump(true);
@@ -845,7 +821,7 @@ final class Tester {
                             if (!whiteKing.inCheck(grid)) {
                                 white.increaseMoveCount();
                                 {
-                                    Piece pawn = checkWhiteEnPassantRights(pieces);
+                                    Piece pawn = checkWhiteEnPassantRightsSlow(pieces);
                                     moves += perft(grid, depth, !color);
                                     if (pawn != null) {
                                         pawn.setJustMadeDoubleJump(true);
@@ -873,7 +849,7 @@ final class Tester {
                             if (!whiteKing.inCheck(grid)) {
                                 white.increaseMoveCount();
                                 {
-                                    Piece pawn = checkWhiteEnPassantRights(pieces);
+                                    Piece pawn = checkWhiteEnPassantRightsSlow(pieces);
                                     moves += perft(grid, depth, !color);
                                     if (pawn != null) {
                                         pawn.setJustMadeDoubleJump(true);
@@ -911,7 +887,7 @@ final class Tester {
                             if (!whiteKing.inCheck(grid)) {
                                 replace.increaseMoveCount();
                                 {
-                                    Piece pawn = checkWhiteEnPassantRights(pieces);
+                                    Piece pawn = checkWhiteEnPassantRightsSlow(pieces);
                                     moves += perft(grid, depth, !color);
                                     if (pawn != null) {
                                         pawn.setJustMadeDoubleJump(true);
@@ -937,7 +913,7 @@ final class Tester {
                             }
                             white.increaseMoveCount();
                             {
-                                Piece pawn = checkWhiteEnPassantRights(pieces);
+                                Piece pawn = checkWhiteEnPassantRightsSlow(pieces);
                                 moves += perft(grid, depth, !color);
                                 if (pawn != null) {
                                     pawn.setJustMadeDoubleJump(true);
