@@ -2,6 +2,7 @@
 My newest iteration of my 3-year chess project. It comes with a AI Engine, a socket network (for LAN play), and AES Encryption. 
 
 Powerful Optimizations:
+
 -Rather than generating new Grid objects for every 
 search level in AlphaBeta/MinMax, we can just modify the Grid objects
 in place. This improvement made my Chess Engine speed
