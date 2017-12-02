@@ -14,7 +14,9 @@ instead of allocating temporary lists of tiles
 for moves, we generate the tiles (moves) at the same time
 we score them in the AlphaBeta/MinMax,
 which, if successful, would effectively double 
-Chess Engine speed! 
+Chess Engine speed! This is true becuase
+filling a list with tiles and then reading that list
+is twice as slow as just looking at the tiles directly.
 
 -Using a table to store evaluation scores avoids
 unnecessary calculations. However, table lookup
@@ -23,7 +25,7 @@ memory reference modification, is expensive and
 consumes a lot of memory.
 
 To eliminate redundant tree searches, another table 
-could be used which stores a Grid & Search Depth as a Key
+(more effective) could be used which stores a Grid & Search Depth as a Key
 and a Score as a Value. This eliminates entire tree branches, which means 
 the Engine may be able to search much farther!
 
