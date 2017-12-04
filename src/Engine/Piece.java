@@ -1,6 +1,5 @@
 package Engine;
 
-import Util.ChessConstants;
 import static Util.ChessConstants.BLACK;
 import static Util.ChessConstants.WHITE;
 import Util.Constants;
@@ -181,12 +180,12 @@ public abstract class Piece implements Cloneable, Comparable<Piece>, Locatable {
     
     /**
      * Gets the type of this piece. 
-     * @see ChessConstants.PAWN
-     * @see ChessConstants.KNIGHT
-     * @see ChessConstants.BISHOP
-     * @see ChessConstants.ROOK
-     * @see ChessConstants.QUEEN
-     * @see ChessConstants.KING
+     * @see Util.ChessConstants.PAWN
+     * @see Util.ChessConstants.KNIGHT
+     * @see Util.ChessConstants.BISHOP
+     * @see Util.ChessConstants.ROOK
+     * @see Util.ChessConstants.QUEEN
+     * @see Util.ChessConstants.KING
      * @return The type of this piece.
      */
     public abstract String getType();

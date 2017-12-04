@@ -99,6 +99,7 @@ public final class ChessConstants {
     }
     
     //conversion methods between [8][8] and [64]
+    //indexes [0][0] -> [0] & [7][7] -> [63]
     public static final int getLocation(int row, int column) {
         return LENGTH * row + column;
     }
@@ -113,5 +114,18 @@ public final class ChessConstants {
     
     public static final int getColumn(int index) {
         return index % LENGTH;
+    }
+
+    public static void main(String[] args) {
+        for (int index = 0; index < ChessConstants.LINEAR_LENGTH; ++index) {
+            Point point = getLocation(index);
+            System.out.println("Current Linear Index: " + getLocation(point.x, point.y));
+            System.out.println("Current Matrix Index: [" + point.x + "][" + point.y + "]");
+            System.out.println(getRow(index) + " " + getColumn(index));
+            if (getRow(index) != point.x || getColumn(index) != point.y  || getLocation(point.x, point.y) != index) {
+                throw new Error();
+            }
+            System.out.println();
+        }
     }
 }

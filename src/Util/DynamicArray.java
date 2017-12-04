@@ -185,10 +185,8 @@ public final class DynamicArray<E> implements Iterable<E> {
     }
     
     public void removeAll(Object obj) {
-        int index = indexOf(obj);
-        while (index >= 0) {
+        for (int index = indexOf(obj); index >= 0; index = indexOf(obj)) {
             remove(index);
-            index = indexOf(obj);
         }
     }
     

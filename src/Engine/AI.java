@@ -838,17 +838,61 @@ public final class AI {
                 Tester.checkProtections(pieces, side);
                 for (int index = 0; index != numberOfPositions; ++index) {
                     PositionHolder current = possiblePositions.get(index);
-                    Tester.check(current.grid, current.clonedGrid, current.whites, current.clonedWhites);
-                    Tester.check(current.grid, current.clonedGrid, current.blacks, current.clonedBlacks);
-                    int alphaBeta = AlphaBetaWhite.min(current.grid, current.whites, current.blacks, TEST_DEPTH, NEGATIVE_INFINITY, POSITIVE_INFINITY);
-                    int minMax = MinMaxWhite.min(current.grid, current.whites, current.blacks, TEST_DEPTH);
-                    if (alphaBeta != minMax) {
-                        System.out.println("Algorithm Mismatch");
-                        System.out.println("AlphaBeta: " + alphaBeta);
-                        System.out.println("MinMax: " + minMax);
+                    
+                    /**
+                     * I believe this is correct, say you are playing as White
+                     * After we generate our White Move List, we start tree 
+                     * searching from Black's moves, checking min function, always.
+                     * 
+                     * If the depth is odd, we will be searching & scoring the 
+                     * worst of Black's moves. Choosing the maximal (usually negative value)
+                     * that is closest to 0 will be correct.
+                     * White (original) Black -> Evaluate
+                     * 
+                     * If the depth is even, we will be searching & scoring the 
+                     * best of White's moves. Choosing the maximal (usually positive value)
+                     * that is closest to 0 will be correct.
+                     * White (original) Black -> White -> Evaluate
+                     * 
+                     * So yet again, we choose the best of the min.
+                     * 
+                     */
+                    {
+                        Tester.checkGrids(current.grid, current.clonedGrid);
+                        
+                        Tester.checkPieces(current.whites, current.clonedWhites);
+                        Tester.checkPieces(current.blacks, current.clonedBlacks);
                     }
-                    Tester.check(current.grid, current.clonedGrid, current.whites, current.clonedWhites);
-                    Tester.check(current.grid, current.clonedGrid, current.blacks, current.clonedBlacks);
+                    {
+                        int alphaBetaWhiteMin = AlphaBetaWhite.min(current.grid, current.whites, current.blacks, TEST_DEPTH, NEGATIVE_INFINITY, POSITIVE_INFINITY);
+                        int alphaBetaWhiteMax = AlphaBetaWhite.max(current.grid, current.whites, current.blacks, TEST_DEPTH, NEGATIVE_INFINITY, POSITIVE_INFINITY);
+                        int minMaxWhiteMin = MinMaxWhite.min(current.grid, current.whites, current.blacks, TEST_DEPTH);
+                        int minMaxWhiteMax = MinMaxWhite.max(current.grid, current.whites, current.blacks, TEST_DEPTH);
+                        
+                        System.out.println("White AlphaBeta Min (Black Moves): " + alphaBetaWhiteMin);
+                        System.out.println("White AlphaBeta Max (White Moves): " + alphaBetaWhiteMax);
+                        System.out.println("White MinMax Min (Black Moves): " + minMaxWhiteMin);
+                        System.out.println("White MinMax Max (White Moves): " + minMaxWhiteMax);
+                        System.out.println();
+                    }
+                    {
+                        int alphaBetaBlackMin = AlphaBetaBlack.min(current.grid, current.whites, current.blacks, TEST_DEPTH, NEGATIVE_INFINITY, POSITIVE_INFINITY);
+                        int alphaBetaBlackMax = AlphaBetaBlack.max(current.grid, current.whites, current.blacks, TEST_DEPTH, NEGATIVE_INFINITY, POSITIVE_INFINITY);
+                        int minMaxBlackMin = MinMaxBlack.min(current.grid, current.whites, current.blacks, TEST_DEPTH);
+                        int minMaxBlackMax = MinMaxBlack.max(current.grid, current.whites, current.blacks, TEST_DEPTH);
+                        
+                        System.out.println("Black AlphaBeta Max (Black Moves): " + alphaBetaBlackMax);
+                        System.out.println("Black AlphaBeta Min (White Moves): " + alphaBetaBlackMin);
+                        System.out.println("Black MinMax Max (Black Moves): " + minMaxBlackMax);
+                        System.out.println("Black MinMax Min (White Moves): " + minMaxBlackMin);
+                        System.out.println();
+                        System.out.println();
+                    }
+                    {
+                        Tester.checkGrids(current.grid, current.clonedGrid);
+                        Tester.checkPieces(current.whites, current.clonedWhites);
+                        Tester.checkPieces(current.blacks, current.clonedBlacks);
+                    }
                 }
             }
 

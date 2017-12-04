@@ -449,15 +449,17 @@ public final class Grid {
     @Override
     @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
     public boolean equals(Object obj) {
+        /* 
+        //this code has a rare chance of executing, since we are dealing with clones, 
+        //not references, so we get rid of unnecessary checks like this one
         if (obj == this) {
             System.out.println("Hey its  me!");
             return true;
         }
-        //System.out.println("Debugging");
+         */
         Grid other = (Grid) obj;
         for (int index = 0; index < ChessConstants.LINEAR_LENGTH; ++index) {
             if (!tiles[index].equals(other.tiles[index])) {
-                //System.err.println("Hi!");
                 return false;
                 /*
                 System.out.println(tiles[index]);

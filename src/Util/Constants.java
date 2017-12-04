@@ -23,6 +23,7 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JTextField;
 
+//class for common operations
 public final class Constants {
     
     public static final int NEGATIVE_INFINITY = -2147483647;
@@ -88,9 +89,9 @@ public final class Constants {
     //deep equality method
     @SuppressWarnings("null")
     public static final boolean equals(Object a, Object b) {
-        boolean aNull = (a == null);
-        boolean bNull = (b == null);
-        return (!aNull && !bNull) ? a.equals(b) : aNull == bNull;
+        boolean aIsNull = (a == null);
+        boolean bIsNull = (b == null);
+        return (!aIsNull && !bIsNull) ? a.equals(b) : aIsNull == bIsNull;
     }
 
     /**
@@ -202,22 +203,48 @@ public final class Constants {
             }
         }
         if (list.isEmpty()) {
-            throw new IllegalArgumentException("Could not generate a suitable font.");
+            return null;
         }
         Font font = list.getLast();
         list.clear();
         return font;
     }
 
+    /**
+     * Returns the greater of 2 given integers.
+     * @param a The first integer.
+     * @param b The second integer.
+     * @return The larger integer of {@code a} and {@code b}.
+     */
     public static int max(int a, int b) {
         return (a >= b) ? a : b;
     }
 
+    /**
+     * Returns the lesser of 2 given integers.
+     * @param a The first integer.
+     * @param b The second integer.
+     * @return The smaller integer of {@code a} and {@code b}.
+     */
     public static int min(int a, int b) {
         return (a <= b) ? a : b;
     }
     
+    /**
+     * Returns the absolute value of a given integer.
+     * @param n The given integer.
+     * @return The absolute value of a given integer.
+     */
     public static int abs(int n) {
         return (n < 0) ? -n : n;
+    }
+    
+    /**
+     * Flips the sign of a given integer.
+     * @param n The given integer.
+     * @return {@code -n}
+     */
+    public static int flipSigns(int n) {
+        return -n;
     }
 }

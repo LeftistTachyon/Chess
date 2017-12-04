@@ -67,12 +67,13 @@ final class Pieces {
     }
 
     /**
-     * Returns the index of a piece object in a list of pieces and removes the
-     * piece from the list.
+     * Returns the index of a piece object in a list of pieces and removes that
+     * piece from the list, if the list contains that piece.
      *
-     * @param pieces The given list of pieces.
-     * @param piece The given piece to remove.
-     * @return The index of the given piece in the given list of pieces.
+     * @param pieces The list of pieces.
+     * @param piece The piece to remove.
+     * @return The index of the given piece in the given list of pieces or {@code -1}
+     * if the list does not contain the given piece.
      */
     static int remove(List<Piece> pieces, Piece piece) {
         for (int index = (pieces.size() - 1); index >= 0; --index) {
@@ -88,9 +89,9 @@ final class Pieces {
      * Returns a deep copy of a given list of pieces.
      *
      * @param pieces The given list of pieces.
-     * @return A deep copy of a given list of pieces, the returned list may be
-     * freely modified and its elements are independent of those from the given
-     * list of pieces.
+     * @return A deep copy of a given list of pieces, the returned list and
+     * its elements may be freely modified without affecting the original list
+     * and its elements.
      */
     static List<Piece> getDeepCopy(List<Piece> pieces) {
         int size = pieces.size();

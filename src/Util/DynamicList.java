@@ -540,12 +540,11 @@ implements List<E>, Cloneable, RandomAccess, Serializable {
             without[allocateIndex++] = elementData[originalIndex++];
         }
 
-        originalIndex = index + 1;
-
         //get all elements after removed element
-        for (; originalIndex < size;) {
-            without[allocateIndex++] = elementData[originalIndex++];
+        for (originalIndex = index + 1; originalIndex < size; ++originalIndex, ++allocateIndex) {
+            without[allocateIndex] = elementData[originalIndex];
         }
+        
         //update operations
         elementData = null;
         elementData = without;
@@ -1104,10 +1103,10 @@ implements List<E>, Cloneable, RandomAccess, Serializable {
     @SuppressWarnings("FinalizeDeclaration")
     final public void finalize() throws Throwable {
         try {
-            super.finalize();
             synchronized (this) {
                 wipe();
             }
+            super.finalize();
         }
         catch (Throwable ex) {
             throw new InternalError(ex);

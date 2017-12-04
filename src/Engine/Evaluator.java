@@ -697,7 +697,16 @@ public final class Evaluator {
         }
 
         int score = blackScore - whiteScore;
-        //AI.BLACK_STORE.putEntry(grid, score);
+        //AI.BLACK_STORE.putEntry(grid, score); //we can put a clone, but don't strictly check equals method, that will never work due to move counts
+        //could exclude movecounts in piece checking
         return score;
+    }
+    
+    private static int getBlackScore(Grid grid, List<Piece> white, List<Piece> black) {
+        return 0;
+    }
+    
+    private static int getWhiteScore(Grid grid, List<Piece> white, List<Piece> black) {
+        return 0;
     }
 }

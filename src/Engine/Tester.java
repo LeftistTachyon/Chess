@@ -16,6 +16,7 @@ import java.util.regex.Pattern;
 final class Tester {
     
     private static final int MAX_DEPTH = 5;
+    private static final boolean TEST_PERFT = false;
 
     @SuppressWarnings("Convert2Lambda")
     private static final Comparator<Tile> TILE_SORTER = new Comparator<Tile>() {
@@ -323,12 +324,14 @@ final class Tester {
             int score = !color ? SecureMinMaxBlack.min(new Board(new Grid(grid)), depth) : SecureMinMaxBlack.max(new Board(new Grid(grid)), depth);
             long endTime = System.nanoTime();
             System.out.println("SecureMinMaxBlack (" + ((!color) ? "Min-White" : "Max-Black") + ") Depth: " + depth + " Score: " + score + " Perft: " + SecureMinMaxBlack.getPerftCounter() + " Took: " + TimeUnit.SECONDS.convert(endTime - startTime, TimeUnit.NANOSECONDS) + " seconds");
-            SecureMinMaxBlack.setPerftCounter(0);            
+            SecureMinMaxBlack.setPerftCounter(0);
         }
-        
-        for (int depth = 1; depth <= MAX_DEPTH; ++depth) {
-            long startTime = System.nanoTime();
-            System.out.println((!color ? "White" : "Black") + " Perft(" + depth + ") Result: " + perft(grid, depth, color) + " Took: " + TimeUnit.SECONDS.convert(System.nanoTime() - startTime, TimeUnit.NANOSECONDS) + " seconds");
+
+        if (TEST_PERFT) {
+            for (int depth = 1; depth <= MAX_DEPTH; ++depth) {
+                long startTime = System.nanoTime();
+                System.out.println((!color ? "White" : "Black") + " Perft(" + depth + ") Result: " + perft(grid, depth, color) + " Took: " + TimeUnit.SECONDS.convert(System.nanoTime() - startTime, TimeUnit.NANOSECONDS) + " seconds");
+            }
         }
 
         check(grid, copiedGrid, pieces, copiedPieces);

@@ -47,7 +47,7 @@ public final class PieceConverter extends Converter<String, Piece> {
             }
         }
         catch (RuntimeException ex) {
-
+            ex.printStackTrace();
         }
         return null;
     }
@@ -57,10 +57,15 @@ public final class PieceConverter extends Converter<String, Piece> {
         if (piece == null) {
             throw new NullPointerException();
         }
-        String result = piece.getRow() + SPACE + piece.getColumn() + SPACE + piece.getMoveCount() + SPACE + piece.isWhite() + SPACE + piece.getType();
-        if (piece.isPawn()) {
-            return result + SPACE + piece.justMadeDoubleJump();
-        }
-        return result;
+        String result = piece.getRow() 
+                + SPACE
+                + piece.getColumn()
+                + SPACE
+                + piece.getMoveCount()
+                + SPACE
+                + piece.isWhite()
+                + SPACE
+                + piece.getType();
+        return (piece.isPawn()) ? (result + SPACE + piece.justMadeDoubleJump()) : (result);
     }
 }

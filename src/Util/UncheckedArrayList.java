@@ -571,7 +571,7 @@ public class UncheckedArrayList<E> extends AbstractList<E> implements List<E>, R
      * {@code toIndex==fromIndex}, this operation has no effect.)
      *
      * @throws IndexOutOfBoundsException if {@code fromIndex} or {@code toIndex}
-     * is out of range      ({@code fromIndex < 0 ||
+     * is out of range null     ({@code fromIndex < 0 ||
      *          fromIndex >= size() ||
      *          toIndex > size() ||
      *          toIndex < fromIndex})
