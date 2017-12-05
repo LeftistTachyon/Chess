@@ -153,7 +153,6 @@ public final class Evaluator {
         mirroredColumnsEqual(toMatrix(KING_POSITION_MIDDLE_WHITE), toMatrix(KING_POSITION_MIDDLE_BLACK));
         mirroredColumnsEqual(toMatrix(KING_POSITION_END_WHITE), toMatrix(KING_POSITION_END_BLACK));
     }
-    //4:05 woman coughing in defcon game
 
     private static int[][] toMatrix(int[] nums) {
         int[][] matrix = new int[ChessConstants.LENGTH][ChessConstants.LENGTH];
